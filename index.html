@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en" id="root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FIFA World Cup 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap');
+:root{--bg:#060b14;--bg2:#0d1525;--bg3:#111d31;--green:#00e87a;--gold:#ffd700;--red:#ff3b5c;--text:#e2eaf5;--sub:#7a91b0;--border:#1e2f47;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;transition:direction .1s}
+body.ar{direction:rtl;font-family:'Cairo',sans-serif}
+
+.header{background:linear-gradient(135deg,#060b14,#0a1628 50%,#060b14);border-bottom:2px solid var(--green);padding:26px 24px 18px;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 30px,rgba(0,232,122,.015) 30px,rgba(0,232,122,.015) 60px)}
+.header-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.header-left{display:flex;align-items:center;gap:16px;flex-wrap:wrap;flex:1}
+.trophy{font-size:46px;filter:drop-shadow(0 0 20px var(--gold));flex-shrink:0}
+.title-main{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,5vw,50px);letter-spacing:3px;line-height:1;background:linear-gradient(90deg,#fff,var(--gold) 55%,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.title-sub{font-size:12px;color:var(--sub);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+body.ar .title-sub{letter-spacing:0;font-family:'Cairo',sans-serif}
+.hosts{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.host-badge{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--sub);display:flex;align-items:center;gap:7px}
+.host-badge img{height:15px;border-radius:2px;border:1px solid rgba(255,255,255,.1)}
+
+/* Language toggle in header */
+.lang-toggle{display:flex;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden;flex-shrink:0;align-self:flex-start;margin-top:4px}
+.lang-btn{padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--sub);border:none;background:transparent;letter-spacing:1px;line-height:1}
+.lang-btn.active{background:linear-gradient(135deg,var(--gold),#ffb700);color:#000}
+.lang-btn:hover:not(.active){color:var(--text)}
+.lang-sep{width:1px;height:100%;background:var(--border)}
+
+.stats-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 24px}
+.stats-inner{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap}
+.stat{flex:1;min-width:80px;text-align:center;padding:7px 10px;border-right:1px solid var(--border)}
+body.ar .stat{border-right:none;border-left:1px solid var(--border)}
+body.ar .stat:last-child{border-left:none}
+.stat:last-child{border-right:none}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--green);line-height:1}
+.stat-lbl{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+body.ar .stat-lbl{letter-spacing:0;text-transform:none;font-family:'Cairo',sans-serif;font-size:11px}
+
+.filters-wrap{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 24px;position:sticky;top:0;z-index:100}
+.filters-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.filter-lbl{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;min-width:52px;flex-shrink:0}
+body.ar .filter-lbl{letter-spacing:0;text-transform:none;font-family:'Cairo',sans-serif;font-size:12px;min-width:60px}
+.search-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 13px;font-size:13px;font-family:inherit;outline:none;flex:1;min-width:150px;max-width:260px;transition:border-color .2s}
+.search-box:focus{border-color:var(--green)}
+.search-box::placeholder{color:var(--sub)}
+.pill-group{display:flex;gap:5px;flex-wrap:wrap}
+.pill{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:12px;cursor:pointer;transition:all .15s;color:var(--sub);white-space:nowrap;font-family:inherit}
+body.ar .pill{font-size:11px}
+.pill:hover{border-color:var(--green);color:var(--text)}
+.pill.active{background:var(--green);border-color:var(--green);color:#000;font-weight:700}
+.tz-toggle{display:flex;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-left:auto}
+body.ar .tz-toggle{margin-left:0;margin-right:auto}
+.tz-btn{padding:6px 13px;font-size:12px;cursor:pointer;transition:all .15s;color:var(--sub);border:none;background:transparent;font-family:inherit}
+.tz-btn.active{background:var(--green);color:#000;font-weight:700}
+
+.main{max-width:1200px;margin:0 auto;padding:22px 24px 60px}
+.date-group{margin-bottom:30px}
+.date-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.date-header-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+body.ar .date-header-line{background:linear-gradient(270deg,var(--border),transparent)}
+.date-label{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold);white-space:nowrap}
+body.ar .date-label{font-family:'Cairo',sans-serif;font-size:17px;letter-spacing:0;font-weight:700}
+.date-count{font-size:10px;color:var(--sub);background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:2px 8px;white-space:nowrap}
+body.ar .date-count{font-family:'Cairo',sans-serif;font-size:11px}
+.matches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s}
+.card:hover{border-color:rgba(0,232,122,.35);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,232,122,.07)}
+.card-top{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 0}
+.group-badge{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;padding:3px 10px;border-radius:20px;border:1px solid}
+body.ar .group-badge{font-family:'Cairo',sans-serif;font-size:11px;letter-spacing:0}
+.stage-tag{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:1px}
+body.ar .stage-tag{text-transform:none;font-family:'Cairo',sans-serif;font-size:11px;letter-spacing:0}
+.card-body{padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.team{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.flag-wrap{position:relative;width:52px;height:35px}
+.flag-img{width:52px;height:35px;object-fit:cover;border-radius:5px;border:2px solid var(--border);display:block;box-shadow:0 2px 8px rgba(0,0,0,.4);opacity:0;transition:opacity .3s}
+.flag-img.ok{opacity:1}
+.flag-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg3);border-radius:5px;border:2px solid var(--border);font-size:18px;transition:opacity .3s}
+.flag-ph.gone{opacity:0;pointer-events:none}
+.team-name{font-size:11px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;color:var(--text)}
+.vs-block{display:flex;flex-direction:column;align-items:center;padding:0 4px;flex-shrink:0}
+.vs{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--sub);line-height:1}
+.card-footer{border-top:1px solid var(--border);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.time-venue{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.match-time{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--green);letter-spacing:.5px;line-height:1}
+body.ar .match-time{font-family:'Cairo',sans-serif;font-size:14px;letter-spacing:0;font-weight:700}
+.tz-label{font-size:10px;font-family:'DM Sans',sans-serif;font-weight:400;color:var(--sub)}
+.match-date-local{font-size:10px;color:rgba(0,232,122,.6)}
+.match-venue{font-size:10px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
+.venue-flag{height:11px;border-radius:2px;vertical-align:middle;border:1px solid var(--border);flex-shrink:0}
+.btn-row{display:flex;gap:6px;flex-shrink:0}
+.gcal-btn{background:linear-gradient(135deg,#1a73e8,#0d47a1);border:none;border-radius:7px;padding:6px 11px;font-size:11px;font-weight:600;color:#fff;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;transition:all .2s;font-family:inherit}
+.gcal-btn:hover{filter:brightness(1.2)}
+.pred-btn{background:linear-gradient(135deg,#7c3aed,#4c1d95);border:none;border-radius:7px;padding:6px 11px;font-size:11px;font-weight:600;color:#fff;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;transition:all .2s;font-family:inherit;min-width:82px;justify-content:center}
+.pred-btn:hover{filter:brightness(1.2);box-shadow:0 3px 12px rgba(124,58,237,.4)}
+.pred-btn.active-pred{background:linear-gradient(135deg,#4c1d95,#7c3aed)}
+
+.pred-panel{border-top:1px solid var(--border);padding:12px 14px;background:linear-gradient(135deg,rgba(124,58,237,.07),rgba(76,29,149,.04));animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.pred-header{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.pred-header-txt{font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:1.5px}
+body.ar .pred-header-txt{text-transform:none;letter-spacing:0;font-family:'Cairo',sans-serif;font-size:12px}
+.pred-score-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px}
+.pred-team{display:flex;flex-direction:column;align-items:center;gap:5px}
+.pred-flag-sm{width:38px;height:26px;object-fit:cover;border-radius:4px;border:1px solid var(--border)}
+.pred-snum{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;line-height:1}
+.pred-dash{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--sub);padding-bottom:4px}
+.pred-outcome{text-align:center;margin-bottom:9px}
+.outcome-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;font-family:inherit}
+.wh{background:rgba(0,232,122,.15);color:var(--green);border:1px solid rgba(0,232,122,.3)}
+.wa{background:rgba(255,59,92,.15);color:var(--red);border:1px solid rgba(255,59,92,.3)}
+.wd{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid rgba(255,215,0,.3)}
+.pred-analysis{font-size:12px;color:#b8c8e0;line-height:1.65;margin-bottom:8px;padding:0 10px;border-right:3px solid rgba(124,58,237,.5);text-align:right;direction:rtl;font-family:'Cairo',sans-serif}
+body:not(.ar) .pred-analysis{border-right:none;border-left:3px solid rgba(124,58,237,.5);text-align:right}
+.pred-analysis-en{font-size:12px;color:#b8c8e0;line-height:1.65;margin-bottom:8px;padding:0 10px;border-left:3px solid rgba(124,58,237,.5);text-align:left;direction:ltr}
+.pred-stars{font-size:11px;color:rgba(167,139,250,.85);margin-bottom:8px;text-align:center;font-family:inherit}
+.pred-conf-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--sub);font-family:inherit}
+.conf-bar{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.conf-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#7c3aed,#a78bfa);transition:width .8s ease}
+.conf-pct{color:#a78bfa;font-weight:700;min-width:32px;text-align:right}
+body.ar .conf-pct{text-align:left}
+.gcal-add-all{font-size:10px;padding:5px 10px;background:linear-gradient(135deg,#1a73e8,#0d47a1);border:none;border-radius:7px;color:#fff;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.no-results{text-align:center;padding:60px 20px;color:var(--sub)}
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--green);color:#000;border-radius:10px;padding:12px 20px;font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;transform:translateY(100px);opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 8px 28px rgba(0,232,122,.3);font-family:inherit}
+body.ar .toast{right:auto;left:24px}
+.toast.show{transform:translateY(0);opacity:1}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#1e2f47;border-radius:3px}
+@media(max-width:600px){.main{padding:14px 10px 40px}.matches-grid{grid-template-columns:1fr}.tz-toggle{margin-left:0}.lang-toggle{margin-top:8px}}
+</style>
+</head>
+<body id="BODY">
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="trophy">🏆</div>
+      <div>
+        <div class="title-main">FIFA World Cup 2026</div>
+        <div class="title-sub" id="hSub"></div>
+        <div class="hosts" id="hHosts"></div>
+      </div>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="lb-en" onclick="setLang('en')">EN</button>
+      <div class="lang-sep"></div>
+      <button class="lang-btn" id="lb-ar" onclick="setLang('ar')">عربي</button>
+    </div>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-num">48</div><div class="stat-lbl" id="st-teams"></div></div>
+    <div class="stat"><div class="stat-num">12</div><div class="stat-lbl" id="st-groups"></div></div>
+    <div class="stat"><div class="stat-num">104</div><div class="stat-lbl" id="st-matches"></div></div>
+    <div class="stat"><div class="stat-num">16</div><div class="stat-lbl" id="st-stadiums"></div></div>
+    <div class="stat"><div class="stat-num">🔮</div><div class="stat-lbl" id="st-ai"></div></div>
+  </div>
+</div>
+
+<div class="filters-wrap">
+  <div class="filters-inner">
+    <div class="filter-row">
+      <span class="filter-lbl" id="fl-search"></span>
+      <input class="search-box" id="SI" oninput="applyFilters()">
+      <div class="tz-toggle">
+        <button class="tz-btn active" id="tz-et" onclick="setTz('ET')">ET</button>
+        <button class="tz-btn" id="tz-cairo" onclick="setTz('Cairo')" id="tz-cairo-btn"></button>
+      </div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-lbl" id="fl-stage"></span>
+      <div class="pill-group" id="SP"></div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-lbl" id="fl-group"></span>
+      <div class="pill-group" id="GP"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main" id="MC"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STRINGS ───────────────────────────────────────────────────────────────────
+const STR={
+  en:{
+    sub:'⚽ June 11 – July 19, 2026 · North America · AI Predictions',
+    hUSA:'🇺🇸 USA — 78 matches',hCA:'🇨🇦 Canada — 13 matches',hMX:'🇲🇽 Mexico — 13 matches',
+    stTeams:'Teams',stGroups:'Groups',stMatches:'Matches',stStadiums:'Stadiums',stAI:'AI Predict',
+    flSearch:'Search',flStage:'Stage',flGroup:'Group',
+    srchPh:'🔍 Search team…',
+    tzCairo:'🇪🇬 Cairo',
+    pills:['All','Group Stage','R32','R16','QF','SF','Final'],
+    grpAll:'All',
+    calBtn:'+ Cal',predBtn:'🔮 Predict',addAll:'📅 Add All',
+    cnt:'matches',noRes:'No matches found.',
+    koLabel:'Knockout',
+    predHdr:'AI Prediction',predConf:'Confidence',
+    winPfx:'🏆 Win',drawTxt:'🤝 Draw',
+    cairoPh:' · Cairo',
+    toast:'📅 Added to Google Calendar!',
+    noKoPred:'Knockout predictions available after group stage.',
+    starsSep:'|',
+  },
+  ar:{
+    sub:'⚽ ١١ يونيو – ١٩ يوليو ٢٠٢٦ · أمريكا الشمالية · توقعات AI',
+    hUSA:'🇺🇸 الولايات المتحدة — 78 مباراة',hCA:'🇨🇦 كندا — 13 مباراة',hMX:'🇲🇽 المكسيك — 13 مباراة',
+    stTeams:'فريق',stGroups:'مجموعة',stMatches:'مباراة',stStadiums:'ملعب',stAI:'توقع AI',
+    flSearch:'بحث',flStage:'المرحلة',flGroup:'المجموعة',
+    srchPh:'🔍 ابحث عن منتخب…',
+    tzCairo:'🇪🇬 القاهرة',
+    pills:['الكل','المجموعات','د٣٢','د١٦','ر.ف','نصف','النهائي'],
+    grpAll:'الكل',
+    calBtn:'+ تقويم',predBtn:'🔮 توقعات',addAll:'📅 أضف الكل',
+    cnt:'مباريات',noRes:'لا توجد مباريات.',
+    koLabel:'نوكاوت',
+    predHdr:'توقع الذكاء الاصطناعي',predConf:'دقة التوقع',
+    winPfx:'🏆 فوز',drawTxt:'🤝 تعادل',
+    cairoPh:' · القاهرة',
+    toast:'📅 تمت الإضافة إلى Google Calendar!',
+    noKoPred:'توقعات النوكاوت متاحة بعد انتهاء المجموعات.',
+    starsSep:'|',
+  }
+};
+
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const FLAGS={Mexico:'mx','South Africa':'za','South Korea':'kr',Czechia:'cz',Canada:'ca','Bosnia & Herz.':'ba',Qatar:'qa',Switzerland:'ch',Brazil:'br',Morocco:'ma',Haiti:'ht',Scotland:'gb-sct',USA:'us',Paraguay:'py',Australia:'au','Türkiye':'tr',Germany:'de','Curaçao':'cw','Ivory Coast':'ci',Ecuador:'ec',Netherlands:'nl',Japan:'jp',Sweden:'se',Tunisia:'tn',Spain:'es','Cape Verde':'cv','Saudi Arabia':'sa',Uruguay:'uy',Belgium:'be',Egypt:'eg',Iran:'ir','New Zealand':'nz',France:'fr',Senegal:'sn',Iraq:'iq',Norway:'no',Argentina:'ar',Algeria:'dz',Austria:'at',Jordan:'jo',Portugal:'pt','DR Congo':'cd',Uzbekistan:'uz',Colombia:'co',England:'gb-eng',Croatia:'hr',Ghana:'gh',Panama:'pa'};
+const GC={A:'#e74c3c',B:'#3b82f6',C:'#22c55e',D:'#f59e0b',E:'#a855f7',F:'#06b6d4',G:'#f97316',H:'#ec4899',I:'#14b8a6',J:'#84cc16',K:'#ef4444',L:'#8b5cf6'};
+const VFLAGS={'Estadio Azteca':'mx','Estadio Akron':'mx','Estadio BBVA':'mx','BMO Field':'ca','BC Place':'ca','SoFi Stadium':'us',"Levi's Stadium":'us','MetLife Stadium':'us','Gillette Stadium':'us','NRG Stadium':'us','AT&T Stadium':'us','Lincoln Financial':'us','Lumen Field':'us','Hard Rock Stadium':'us','Mercedes-Benz Stadium':'us','Arrowhead Stadium':'us'};
+const fu=n=>{const c=FLAGS[n];return c?'https://flagcdn.com/w80/'+c+'.png':null};
+
+const PREDS={
+'Mexico||South Africa':{h:2,a:0,o:'home_win',c:78,ar:'المكسيك تستفيد من لعبها في الأستيكا أمام جمهور ساخن ودعم لا محدود. جنوب أفريقيا ستقاتل بشجاعة لكن التفوق التقني المكسيكي سيحسم الفارق.',en:"Mexico's home advantage at Azteca is massive with electric crowd support. South Africa will fight hard but Mexico's technical quality wins out.",ph:'Hirving Lozano',pa:'Percy Tau'},
+'South Korea||Czechia':{h:1,a:1,o:'draw',c:58,ar:'مباراة متوازنة بين منتخبين متقاربين — كوريا الجنوبية أسرع في الانتقالات بينما التشيك أكثر تنظيماً أوروبياً. نتيجة التعادل منطقية.',en:'A balanced clash between evenly matched sides. South Korea are quicker in transition while Czech plays structured European football. A draw is the most logical outcome.',ph:'Son Heung-min',pa:'Patrik Schick'},
+'Canada||Bosnia & Herz.':{h:2,a:1,o:'home_win',c:65,ar:'كندا تلعب أمام جمهورها وتمتلك ألفونسو ديفيس ولاعبين من كبرى الدوريات الأوروبية. البوسنة خطرة في الانتقال السريع لكن كندا ستحسم في المنزل.',en:'Canada plays at home with Alphonso Davies and Premier League talent. Bosnia are dangerous on the counter but Canada\'s home support seals it.',ph:'Alphonso Davies',pa:'Edin Džeko'},
+'USA||Paraguay':{h:2,a:0,o:'home_win',c:72,ar:'الولايات المتحدة تمتلك جيلاً ذهبياً يلعب في أفضل الأندية الأوروبية ومدعوم بحماس الجمهور الأمريكي. باراغواي دفاعية لكن الأمريكيين سيضغطون ويفوزون.',en:'The USA\'s golden generation — Pulisic, McKennie, Weah — plays in front of a massive home crowd. Paraguay defend deep but American pressure tells.',ph:'Christian Pulisic',pa:'Miguel Almirón'},
+'Qatar||Switzerland':{h:0,a:3,o:'away_win',c:83,ar:'سويسرا منتخب أوروبي محترف وصعب الاختراق مع خبرة طويلة في البطولات الكبرى. قطر ستجد الفارق كبيراً خارج ملعبها، والسويسريون سيسيطرون بالكامل.',en:'Switzerland are organized, experienced, and hard to break down. Qatar away from home will struggle badly. Swiss dominance expected throughout.',ph:'Granit Xhaka',pa:'Almoez Ali'},
+'Brazil||Morocco':{h:3,a:0,o:'home_win',c:82,ar:'البرازيل من أقوى المرشحين للقب بهجوم يضم فينيسيوس وردريغو ورافينيا. المغرب أبهر العالم في 2022 لكن الجودة البرازيلية الفائقة ستنتصر هنا.',en:'Brazil are title contenders with Vinícius, Rodrygo, and Raphinha in attack. Morocco impressed in 2022 but Brazil\'s superior quality wins this comfortably.',ph:'Vinícius Jr.',pa:'Achraf Hakimi'},
+'Haiti||Scotland':{h:0,a:2,o:'away_win',c:75,ar:'اسكتلندا منتخب أوروبي منظم وذو خبرة عالية في المنافسات الكبرى. هايتي ستقاتل بشجاعة لكن الفارق التقني سيظهر جلياً.',en:'Scotland are an organized European side with experienced Premier League players. Haiti will battle but the quality gap becomes obvious over 90 minutes.',ph:'Andy Robertson',pa:'Duckens Nazon'},
+'Australia||Türkiye':{h:1,a:1,o:'draw',c:55,ar:'مباراة متكافئة بين منتخبين في مستوى متقارب — أستراليا حائطها الدفاعي متين وتركيا تمتلك هجوماً خطيراً. التعادل يبدو النتيجة الأعدل.',en:'An evenly matched contest. Australia are defensively solid while Turkey possess dangerous attacking talent. A draw reflects the genuine balance.',ph:'Hakan Çalhanoğlu',pa:'Mathew Ryan'},
+'Germany||Curaçao':{h:5,a:0,o:'home_win',c:97,ar:'ألمانيا قوة عالمية كبرى أمام منتخب صغير في أول مشاركاته. الفارق هائل تقنياً ولياقياً وتكتيكياً، وستكون مباراة ترفيهية من طرف واحد.',en:'A world power vs. a first-time qualifier. The gap is enormous in every department — Germany will cruise to a comfortable multi-goal victory.',ph:'Kai Havertz',pa:'Leandro Bacuna'},
+'Netherlands||Japan':{h:2,a:1,o:'home_win',c:70,ar:'هولندا تمتلك قوة دفاعية مع فان ديك ومهاجمين رائعين. اليابان أثبتت قدرتها على المفاجآت في مونديال 2022 لكن الهولنديين سيفرضون طريقتهم.',en:'Netherlands have Van Dijk at the back and Gakpo up front. Japan proved they can upset big sides in 2022 but Dutch quality should prevail.',ph:'Virgil van Dijk',pa:'Takumi Minamino'},
+'Ivory Coast||Ecuador':{h:2,a:1,o:'home_win',c:63,ar:'ساحل العاج تمتلك مهاجمين أفارقة استثنائيين وهجوماً سريعاً. الإكوادور منتخب قوي بدنياً ومنظم لكن الجودة الأفريقية ستتفوق في نهاية المطاف.',en:'Ivory Coast boast exceptional African attackers and rapid counter-attack. Ecuador are physically strong and well-organized but Ivorian quality edges it.',ph:'Sébastien Haller',pa:'Enner Valencia'},
+'Sweden||Tunisia':{h:2,a:0,o:'home_win',c:70,ar:'السويد تمتلك ألكسندر إساك وجيلاً واعداً يلعب في الدوريات الأوروبية. تونس دفاعية ومنظمة لكن ستعاني أمام الضغط والسرعة السويديين.',en:'Sweden have Alexander Isak and a promising generation in top European leagues. Tunisia defend well but will struggle to contain sustained Swedish pressure.',ph:'Alexander Isak',pa:'Youssef Msakni'},
+'Spain||Cape Verde':{h:4,a:0,o:'home_win',c:93,ar:'إسبانيا من أفضل منتخبات العالم في اللعب الجماعي والكرة الأرضية مع بيدري وياماللأمال. الرأس الأخضر في مشاركتها الأولى ستتعلم الدرس.',en:'Spain are world class in possession and press. Pedri, Yamal, and Olmo make them irresistible. Cape Verde in their debut face an overwhelming opponent.',ph:'Pedri',pa:'Ryan Mendes'},
+'Belgium||Egypt':{h:3,a:0,o:'home_win',c:82,ar:'بلجيكا تمتلك لاعبين في ذروة عطائهم بقيادة دي بروين، وهجوم لوكاكو التاريخي. مصر تعتمد على صلاح لكن الفارق الجماعي بين المنتخبين كبير.',en:'Belgium have De Bruyne, Lukaku, and Carrasco at peak level. Egypt rely heavily on Salah but the collective gap between the two sides is significant.',ph:'Kevin De Bruyne',pa:'Mohamed Salah'},
+'Saudi Arabia||Uruguay':{h:1,a:2,o:'away_win',c:68,ar:'أوروغواي منتخب تاريخي بمهاجمين عالميين كداروين نونيز وكافاني. السعودية تطورت كثيراً لكن الجودة الأوروغوايية في الثلث الأخير ستحسم الأمر.',en:'Uruguay bring Darwin Núñez and a historic pedigree. Saudi Arabia have improved markedly but Uruguayan quality in the final third is decisive.',ph:'Darwin Núñez',pa:'Salem Al-Dawsari'},
+'Iran||New Zealand':{h:2,a:0,o:'home_win',c:72,ar:'إيران منتخب آسيوي قوي بدنياً ومنظم تكتيكياً مع أزمون التهديفي. نيوزيلندا أقل خبرة في البطولات الكبيرة وستجد صعوبة في خرق الدفاع الإيراني.',en:'Iran are physically robust and tactically disciplined with Azmoun as a threat. New Zealand lack experience at this level and will struggle to penetrate.',ph:'Sardar Azmoun',pa:'Chris Wood'},
+'France||Senegal':{h:2,a:1,o:'home_win',c:73,ar:'فرنسا تمتلك هجوماً من أفضل هجومات العالم يقوده مبابي وديمبيلي وجيرو. السنغال بها ماني وشباب موهوبون لكن العمق الفرنسي يتفوق في النهاية.',en:'France have one of the world\'s finest attacks — Mbappé, Dembélé, Giroud. Senegal are talented with Mané but French depth eventually tells.',ph:'Kylian Mbappé',pa:'Sadio Mané'},
+'Iraq||Norway':{h:0,a:2,o:'away_win',c:78,ar:'النرويج تمتلك هالاند أحد أفضل المهاجمين في تاريخ كرة القدم وخط وسط متكامل. العراق سيدافع بإصرار لكن الجودة النرويجية ستكسر الحصن في النهاية.',en:'Norway possess Haaland — arguably the most dangerous striker alive. Iraq will defend valiantly but Norwegian quality inevitably breaks through.',ph:'Erling Haaland',pa:'Mohanad Ali'},
+'Argentina||Algeria':{h:3,a:0,o:'home_win',c:90,ar:'الأرجنتين حاملة اللقب بقيادة ميسي وهجوم لاواعز ودي بول. الجزائر منتخب أفريقي محترم بمحرز لكن الفارق في المستوى بين المنتخبين كبير جداً.',en:'Defending champions Argentina with Messi, Lautaro, and De Paul. Algeria have Mahrez but the quality gap is enormous — Argentina dominate.',ph:'Lionel Messi',pa:'Riyad Mahrez'},
+'Austria||Jordan':{h:3,a:0,o:'home_win',c:85,ar:'النمسا منتخب أوروبي في أوج تطوره مع لاعبين في الدوري الألماني الممتاز. الأردن يشارك لأول مرة في المونديال وسيجد الفارق التقني والبدني كبيراً.',en:'Austria are a well-organized European side with Bundesliga quality. Jordan make their World Cup debut — the tactical and physical gulf will show clearly.',ph:'Marcel Sabitzer',pa:'Musa Suleiman'},
+'Portugal||DR Congo':{h:3,a:0,o:'home_win',c:87,ar:'البرتغال تمتلك رونالدو وجيلاً رائعاً من الشباب برونالدو وفرنانديز وراموس. جمهورية الكونغو لديها موهبة فردية لكن التنظيم البرتغالي سيتفوق.',en:'Portugal have Ronaldo, Bruno Fernandes, and Gonçalo Ramos — multiple attacking threats. DR Congo have individual talent but Portuguese organization is superior.',ph:'Cristiano Ronaldo',pa:'Chancel Mbemba'},
+'England||Croatia':{h:2,a:1,o:'home_win',c:68,ar:'إنجلترا تمتلك بيلينغهام وسالاح وهجوماً شاباً متحمساً. كرواتيا منتخب خبير وذكي بقيادة مودريتش لكن الطاقة الإنجليزية ستحسم بهدفين.',en:'England boast Bellingham and Foden in a hungry young squad. Croatia are clever and experienced under Modrić but English energy and quality edges it.',ph:'Jude Bellingham',pa:'Luka Modrić'},
+'Ghana||Panama':{h:2,a:0,o:'home_win',c:68,ar:'غانا تمتلك موهبة أفريقية متميزة وسرعة هجومية عالية. بنما منتخب منظم دفاعياً لكنه سيعاني أمام الفردية والسرعة الغانيتين.',en:'Ghana have outstanding African talent and high-speed attacking play. Panama defend diligently but will struggle to cope with Ghanaian pace and skill.',ph:'Thomas Partey',pa:'Rommel Quioto'},
+'Uzbekistan||Colombia':{h:0,a:2,o:'away_win',c:80,ar:'كولومبيا منتخب أمريكي جنوبي قوي بلاعبين في الدوريات الأوروبية الكبرى. أوزبكستان تشارك لأول مرة والفارق التقني سيظهر واضحاً لصالح الكولومبيين.',en:'Colombia have Luis Díaz, Cuadrado, and European league depth. Uzbekistan make their debut — the technical and experience gap heavily favors Colombia.',ph:'Luis Díaz',pa:'Eldor Shomurodov'},
+'Czechia||South Africa':{h:2,a:0,o:'home_win',c:72,ar:'التشيك تريد الانتقام بعد التعادل وتمتلك قوة ثقيلة في الوسط والهجوم. جنوب أفريقيا ستصعّب المهمة لكن التفوق التقني التشيكي سيظهر.',en:'Czech Republic want revenge after the draw, with midfield power and attacking quality. South Africa will make it tough but Czech technical superiority shows.',ph:'Tomáš Souček',pa:'Percy Tau'},
+'Switzerland||Bosnia & Herz.':{h:2,a:1,o:'home_win',c:65,ar:'سويسرا منتخب أوروبي صعب تمتلك صانعي ألعاب موهوبين ودفاعاً منيعاً. البوسنة ستخوض مباراتها بهجوم قوي لكن التنظيم السويسري سيتفوق.',en:'Switzerland are a tough European side with creative midfielders and a solid defense. Bosnia bring strong attack but Swiss organization prevails.',ph:'Granit Xhaka',pa:'Edin Džeko'},
+'Canada||Qatar':{h:2,a:0,o:'home_win',c:80,ar:'كندا أمام جمهورها وتمتلك لاعبين يلعبون في الدوري الإنجليزي الممتاز وبوندسليغا. قطر بعيدة عن ملعبها وستجد صعوبة كبيرة.',en:'Canada at home with Premier League and Bundesliga talent. Qatar away from home will struggle significantly against Canadian quality and crowd support.',ph:'Alphonso Davies',pa:'Almoez Ali'},
+'Mexico||South Korea':{h:2,a:1,o:'home_win',c:65,ar:'المكسيك تستمر في الاستفادة من الدعم الجماهيري الهائل في ملعبها التاريخي. كوريا الجنوبية منتخب جيد ومنظم بقيادة سون لكن ضغط المكسيك سيفرض النتيجة.',en:'Mexico continue to benefit from massive home support at their historic stadium. South Korea are organised under Son\'s leadership but Mexican pressure tells.',ph:'Raúl Jiménez',pa:'Son Heung-min'},
+'USA||Australia':{h:2,a:1,o:'home_win',c:65,ar:'الولايات المتحدة على أرضها وتمتلك بوليسيك وماكيني وويا. أستراليا منتخب آسيوي أوقيانوسي قوي لكن عمق التشكيلة الأمريكية يتفوق.',en:'USA at home with Pulisic, McKennie, and Weah. Australia are a strong Asian-Pacific side but American squad depth is clearly superior.',ph:'Christian Pulisic',pa:'Mathew Leckie'},
+'Scotland||Morocco':{h:1,a:1,o:'draw',c:58,ar:'مباراة متكافئة بين منتخبين لديهما ما يقدمانه — اسكتلندا صلبة في المنزل والمغرب يمتلك حكيمي وزياش. النتيجة المتعادلة منطقية.',en:'A well-matched contest. Scotland are solid at home while Morocco have Hakimi and Ziyech. A draw is the most logical outcome.',ph:'Scott McTominay',pa:'Hakim Ziyech'},
+'Brazil||Haiti':{h:4,a:0,o:'home_win',c:97,ar:'البرازيل بهجومها الاستثنائي أمام منتخب يشارك لأول مرة في كأس العالم. مباراة من طرف واحد والبرازيل ستُسجل أهدافاً متعددة.',en:'Brazil\'s exceptional attack vs. a first-time qualifier. A thoroughly one-sided affair — Brazil will score freely and often.',ph:'Vinícius Jr.',pa:'Duckens Nazon'},
+'Türkiye||Paraguay':{h:2,a:1,o:'home_win',c:65,ar:'تركيا تمتلك خط وسط قوياً مع جالهانوغلو وأردا غولر الموهوب. باراغواي منتخب صعب بدنياً لكن الجودة التقنية التركية ستفرق.',en:'Turkey have a powerful midfield with Çalhanoğlu and the gifted Arda Güler. Paraguay are physically tough but Turkish technical quality makes the difference.',ph:'Hakan Çalhanoğlu',pa:'Miguel Almirón'},
+'Netherlands||Sweden':{h:2,a:1,o:'home_win',c:68,ar:'هولندا منتخب أوروبي راسخ بدفاع صلب مع فان ديك وهجوم يضم غاكبو. السويد منتخب جيد بإساك لكن الجودة الهولندية في الخط الأول تتفوق.',en:'Netherlands are a solid European side with Van Dijk at the back and Gakpo up front. Sweden have Isak but Dutch quality in the final third prevails.',ph:'Cody Gakpo',pa:'Alexander Isak'},
+'Germany||Ivory Coast':{h:2,a:1,o:'home_win',c:68,ar:'ألمانيا تريد استعادة مكانتها العالمية بعد خيبات الأمل الأخيرة. ساحل العاج تمتلك أسرة مميزة لكن الألمان أكثر تنظيماً وتجربة.',en:'Germany look to reclaim world-class status after recent disappointments. Ivory Coast have fine players but Germans are more organized and experienced.',ph:'Florian Wirtz',pa:'Sébastien Haller'},
+'Ecuador||Curaçao':{h:3,a:0,o:'home_win',c:90,ar:'الإكوادور منتخب أمريكي جنوبي قوي بدنياً وتقنياً. كوراساو في مستوى مختلف تماماً والفارق كبير — الإكوادور ستسيطر بسهولة.',en:'Ecuador are a physically and technically strong South American side. Curaçao are in a different league — Ecuador will dominate with ease.',ph:'Enner Valencia',pa:'Leandro Bacuna'},
+'Tunisia||Japan':{h:1,a:1,o:'draw',c:56,ar:'مباراة متوازنة بين منتخبين يمتلكان أنماطاً متشابهة في اللعب الجماعي. اليابان تعتمد على السرعة وتونس على التنظيم الدفاعي — التعادل توقع معقول.',en:'A balanced match between sides with similar collective styles. Japan rely on speed, Tunisia on defensive organization — a draw is reasonable.',ph:'Takumi Minamino',pa:'Youssef Msakni'},
+'Spain||Saudi Arabia':{h:3,a:0,o:'home_win',c:90,ar:'إسبانيا تمتلك أفضل توليفة في الضغط العالي ومزج بين الشباب والخبرة. السعودية ستدافع بعمق لكنها لن تصمد أمام الهجمات الإسبانية المتتالية.',en:'Spain\'s high press and possession game, blending youth and experience, is world-class. Saudi Arabia will defend deep but cannot withstand sustained Spanish attacks.',ph:'Pedri',pa:'Salem Al-Dawsari'},
+'Belgium||Iran':{h:2,a:0,o:'home_win',c:80,ar:'بلجيكا بلوكاكو وبروين وكارسكو تمتلك أسلحة هجومية متعددة. إيران ستدافع بثمانية لاعبين لكن الجودة البلجيكية ستخترق الحصن في النهاية.',en:'Belgium have Lukaku, De Bruyne, and Carrasco as multiple attacking weapons. Iran will pack eight behind the ball but Belgian quality eventually breaks through.',ph:'Romelu Lukaku',pa:'Sardar Azmoun'},
+'Uruguay||Cape Verde':{h:3,a:0,o:'home_win',c:90,ar:'أوروغواي منتخب تاريخي يريد الفوز والتأهل. الرأس الأخضر في مشاركتها الأولى وستتعرض لضغط هجومي كبير من الأوروغوايين.',en:'Uruguay are a historical powerhouse hungry for qualification. Cape Verde in their debut face relentless Uruguayan attacking pressure throughout.',ph:'Darwin Núñez',pa:'Gelson Fernandes'},
+'New Zealand||Egypt':{h:0,a:1,o:'away_win',c:62,ar:'مصر تمتلك محمد صلاح اللاعب الاستثنائي وتجربة كبيرة في البطولات. نيوزيلندا منتخب أوقيانوسي يكافح في هذا المستوى وصلاح قادر على الفرق.',en:'Egypt have Mohamed Salah — an exceptional game-changer. New Zealand struggle at this level and Salah\'s individual brilliance is enough to decide it.',ph:'Mohamed Salah',pa:'Chris Wood'},
+'Argentina||Austria':{h:2,a:0,o:'home_win',c:82,ar:'الأرجنتين حاملة اللقب تدخل هذه المباراة بزخم هائل وثقة عالية. النمسا منتخب أوروبي جيد لكن لا يمكنه منافسة منظومة ميسي وشركائه.',en:'Defending champions Argentina enter with enormous momentum and confidence. Austria are a decent European side but cannot match the Messi-led system.',ph:'Lionel Messi',pa:'Marcel Sabitzer'},
+'France||Iraq':{h:4,a:0,o:'home_win',c:93,ar:'فرنسا بهجوم مبابي وجيرو ودمبيلي وغريزمان — واحد من أقوى الهجومات عالمياً. العراق في مشاركته الأولى منذ سنوات وسيواجه صعوبة بالغة.',en:'France have Mbappé, Giroud, Dembélé, and Griezmann — one of football\'s finest attacks. Iraq return to the World Cup after years away and face an overwhelming test.',ph:'Kylian Mbappé',pa:'Mohanad Ali'},
+'Norway||Senegal':{h:1,a:1,o:'draw',c:57,ar:'مباراة مثيرة بين هالاند رمز النرويج وماني رمز السنغال — منتخبان لا يقبلان الهزيمة. التعادل يمثل النتيجة الأكثر منطقية بين قوتين متكافئتين.',en:'Haaland vs. Mané — two sides that refuse defeat. A compelling match between genuinely balanced teams where a draw is the most logical result.',ph:'Erling Haaland',pa:'Sadio Mané'},
+'Jordan||Algeria':{h:0,a:2,o:'away_win',c:78,ar:'الجزائر تمتلك محرز وجيلاً موهوباً يسعى لإثبات النفس في هذه البطولة. الأردن في أول مشاركة للمونديال وسيجد الفارق واضحاً.',en:'Algeria have Mahrez and a talented generation eager to prove themselves. Jordan make their World Cup debut and the quality difference will be apparent.',ph:'Riyad Mahrez',pa:'Yazan Al-Naimat'},
+'Portugal||Uzbekistan':{h:4,a:0,o:'home_win',c:93,ar:'البرتغال بقيادة رونالدو وراموس وفيليكس وفرنانديز — عمق استثنائي. أوزبكستان في أول مشاركة في كأس العالم والفارق الفني هائل.',en:'Portugal have Ronaldo, Ramos, Félix, and Bruno Fernandes — exceptional depth. Uzbekistan make their World Cup debut and the technical chasm is enormous.',ph:'Cristiano Ronaldo',pa:'Eldor Shomurodov'},
+'England||Ghana':{h:2,a:0,o:'home_win',c:75,ar:'إنجلترا تمتلك جيلاً ذهبياً بقيادة بيلينغهام وفودن وبوكايو. غانا لديها تشكيلة واعدة لكن العمق الإنجليزي يتفوق في كل خط.',en:'England\'s golden generation — Bellingham, Foden, Saka — is simply too deep. Ghana have promise but English quality across every line is superior.',ph:'Jude Bellingham',pa:'Thomas Partey'},
+'Panama||Croatia':{h:0,a:2,o:'away_win',c:75,ar:'كرواتيا منتخب خبير وذكي تكتيكياً بقيادة مودريتش الأسطوري. بنما منتخب جيد بدنياً لكن الفجوة التقنية والخبرة الكرواتية ستحسم.',en:'Croatia are tactically intelligent and experienced, led by Modrić. Panama are physically able but the technical gap and Croatian experience prove decisive.',ph:'Luka Modrić',pa:'Rommel Quioto'},
+'Colombia||DR Congo':{h:2,a:0,o:'home_win',c:78,ar:'كولومبيا تمتلك لويس دياز وكوادرادو ودفاعاً متيناً. الكونغو تمتلك موهبة فردية لكن التنظيم الكولومبي الجماعي يتفوق بشكل واضح.',en:'Colombia have Luis Díaz, Cuadrado, and a solid defense. DR Congo have individual talent but Colombian collective organization is clearly superior.',ph:'Luis Díaz',pa:'Chancel Mbemba'},
+'Switzerland||Canada':{h:1,a:1,o:'draw',c:60,ar:'مباراة حاسمة للمتأهلين وكلا المنتخبين في حاجة للنقاط. التعادل يبدو النتيجة الأكثر واقعية في مباراة ستكون تكتيكية بامتياز.',en:'A decisive qualifier for both sides — each needs points. A tactical affair where a draw is the most realistic outcome.',ph:'Granit Xhaka',pa:'Alphonso Davies'},
+'Bosnia & Herz.||Qatar':{h:2,a:0,o:'home_win',c:75,ar:'البوسنة تحتاج إلى الفوز لحسم التأهل وتمتلك جيكو وهجوماً خطيراً. قطر ستجد صعوبة كبيرة خارج ملعبها أمام الشغف البوسني.',en:'Bosnia need the win to seal qualification and have Džeko and a dangerous attack. Qatar away from home struggle against the Bosnian passion and quality.',ph:'Edin Džeko',pa:'Almoez Ali'},
+'Scotland||Brazil':{h:0,a:2,o:'away_win',c:87,ar:'البرازيل لا تمنح فرصة لأي منتخب حتى في مباريات المرحلة الأخيرة. اسكتلندا ستدافع بشرف لكن جودة البرازيل الهجومية ستفرض نفسها.',en:'Brazil give nothing away even in dead rubbers. Scotland will defend with honour but Brazilian attacking quality always asserts itself.',ph:'Vinícius Jr.',pa:'Andy Robertson'},
+'Morocco||Haiti':{h:3,a:0,o:'home_win',c:90,ar:'المغرب بحاجة للفوز وتمتلك أدوات هجومية قوية مع حكيمي وزياش. هايتي في أول مشاركة والفارق التقني كبير لصالح الأسود الأطلس.',en:'Morocco need the win and have Hakimi and Ziyech as attacking weapons. Haiti in their debut face a large technical gap — Atlas Lions should cruise.',ph:'Hakim Ziyech',pa:'Duckens Nazon'},
+'Czechia||Mexico':{h:1,a:2,o:'away_win',c:65,ar:'المكسيك تحتاج الفوز للتأهل وتمتلك الدافعية الكافية. التشيك ستدافع بشكل منظم لكن الضغط المكسيكي والحاجة للنقاط ستُحدث الفارق.',en:'Mexico need the win to qualify and bring the motivation to match it. Czech Republic defend well but Mexican pressure and hunger for points makes the difference.',ph:'Raúl Jiménez',pa:'Tomáš Souček'},
+'South Africa||South Korea':{h:0,a:2,o:'away_win',c:68,ar:'كوريا الجنوبية أكثر خبرة في البطولات الكبرى وتمتلك سون لاعب عالمي. جنوب أفريقيا ستصارع بشجاعة لكن التفوق التقني الكوري سيحسم.',en:'South Korea have more experience at this level and Son is a world-class player. South Africa will fight bravely but Korean technical superiority decides it.',ph:'Son Heung-min',pa:'Percy Tau'},
+'Curaçao||Ivory Coast':{h:0,a:3,o:'away_win',c:93,ar:'ساحل العاج تحتاج الفوز لضمان التأهل وتمتلك هجوماً متميزاً. كوراساو لا يمكنها منافسة هذا المستوى والهيمنة ستكون كاملة.',en:'Ivory Coast need the win to secure qualification and have the attack to do it. Curaçao cannot compete at this level — complete Ivorian dominance expected.',ph:'Sébastien Haller',pa:'Leandro Bacuna'},
+'Ecuador||Germany':{h:1,a:3,o:'away_win',c:80,ar:'ألمانيا تريد الفوز لإصلاح مسارها وتمتلك عمقاً وجودة رائعين. الإكوادور ستقاوم وتسجل لكن الفارق في الأفراد والتنظيم الألماني سيحسم.',en:'Germany need a win to correct their course and bring deep, high-quality resources. Ecuador will score and resist but German individual and collective quality is decisive.',ph:'Florian Wirtz',pa:'Enner Valencia'},
+'Japan||Sweden':{h:2,a:1,o:'home_win',c:63,ar:'اليابان أثبتت قدرتها على المفاجآت في المونديال وتمتلك تنظيماً رائعاً. السويد قوية لكن الانضباط الياباني في الضغط العالي سيفرق في الوقت المناسب.',en:'Japan have proved they can upset big sides and possess superb organisation. Sweden are strong but Japanese high-press discipline proves the difference at the critical moment.',ph:'Takumi Minamino',pa:'Alexander Isak'},
+'Tunisia||Netherlands':{h:0,a:2,o:'away_win',c:82,ar:'هولندا قوة أوروبية كبيرة لا تمنح أي فرصة في هذه المباريات الحاسمة. تونس ستقاوم بعناد لكن الجودة الهولندية في الفردية والجماعية ستتفوق.',en:'Netherlands are a major European power who concede little in decisive games. Tunisia will resist stubbornly but Dutch quality — individual and collective — prevails.',ph:'Cody Gakpo',pa:'Youssef Msakni'},
+'Türkiye||USA':{h:1,a:1,o:'draw',c:58,ar:'مباراة حاسمة بين منتخبين على نفس المستوى تقريباً. تركيا على أرض أمريكا والأمريكيون في المنزل — التعادل يُعبّر عن التكافؤ الحقيقي.',en:'A decisive match between two genuinely equal sides. Turkey on American soil, Americans at home — a draw reflects the true balance of power.',ph:'Hakan Çalhanoğlu',pa:'Christian Pulisic'},
+'Paraguay||Australia':{h:1,a:2,o:'away_win',c:62,ar:'أستراليا تحتاج الفوز للتأهل وتمتلك دافعية عالية ولاعبين من الدوريات الكبرى. باراغواي تقاوم لكن الحماس الأسترالي سيحسم في الدقائق الأخيرة.',en:'Australia need the win to qualify, bringing high motivation and European-league quality. Paraguay resist but Australian hunger decides it in the closing minutes.',ph:'Mathew Leckie',pa:'Miguel Almirón'},
+'Norway||France':{h:1,a:2,o:'away_win',c:70,ar:'فرنسا تريد الفوز لإثبات التفوق حتى في المباريات الأخيرة. النرويج بهالاند تجعل المباراة خطرة لكن العمق الفرنسي الاستثنائي سيحسم.',en:'France want to prove their superiority even in late group games. Norway with Haaland make it dangerous but France\'s exceptional depth proves decisive.',ph:'Kylian Mbappé',pa:'Erling Haaland'},
+'Senegal||Iraq':{h:2,a:0,o:'home_win',c:80,ar:'السنغال تمتلك ماني ودياو وعمقاً مميزاً في كل خط. العراق سيدافع بشراسة لكن الجودة السنغالية الفردية والجماعية ستبرز.',en:'Senegal have Mané, Diaw, and notable depth in every line. Iraq will defend ferociously but Senegalese quality — individual and collective — shines through.',ph:'Sadio Mané',pa:'Mohanad Ali'},
+'Cape Verde||Saudi Arabia':{h:0,a:2,o:'away_win',c:72,ar:'السعودية تحتاج الفوز للتأهل وتمتلك الدافعية والجودة الكافية. الرأس الأخضر ستقاوم لكن المملكة العربية السعودية ستثبت التفوق.',en:'Saudi Arabia need the win to qualify — they have the motivation and the quality. Cape Verde will compete but Saudi superiority will show.',ph:'Salem Al-Dawsari',pa:'Ryan Mendes'},
+'Uruguay||Spain':{h:1,a:2,o:'away_win',c:75,ar:'إسبانيا تلتزم بنظامها الجماعي في كل المباريات وتصعب جداً في التعامل. أوروغواي تقاوم ببسالة لكن الهيمنة الإسبانية على الكرة ستحسم.',en:'Spain maintain their collective system in every match and are extremely hard to handle. Uruguay resist bravely but Spanish ball dominance ultimately decides it.',ph:'Pedri',pa:'Darwin Núñez'},
+'Egypt||Iran':{h:2,a:1,o:'home_win',c:63,ar:'مصر لديها محمد صلاح وفرصة حقيقية للتأهل في هذه المباراة الحاسمة. إيران دفاعية ومنظمة لكن صلاح قادر على صنع الفارق بمفرده.',en:'Egypt have Salah and a genuine shot at qualification in this decisive game. Iran are defensively organized but Salah\'s individual brilliance can win it alone.',ph:'Mohamed Salah',pa:'Sardar Azmoun'},
+'New Zealand||Belgium':{h:0,a:3,o:'away_win',c:90,ar:'بلجيكا تمتلك بروين ولوكاكو وكارسكو في مباراة يجب أن تفوز بها. نيوزيلندا تقاوم ببسالة لكن الجودة البلجيكية الاستثنائية ستفرض نفسها.',en:'Belgium have De Bruyne, Lukaku, and Carrasco in a must-win game. New Zealand battle bravely but Belgian exceptional quality simply imposes itself.',ph:'Kevin De Bruyne',pa:'Chris Wood'},
+'Panama||England':{h:0,a:3,o:'away_win',c:88,ar:'إنجلترا تمتلك بيلينغهام وكين وساكا وفودن — قوة هجومية استثنائية. بنما ستدافع بكل ما تملك لكن الجودة الفردية الإنجليزية ستفرق.',en:'England have Bellingham, Kane, Saka, and Foden — exceptional attacking firepower. Panama will defend with everything they have but English individual quality tells.',ph:'Jude Bellingham',pa:'Rommel Quioto'},
+'Croatia||Ghana':{h:2,a:1,o:'home_win',c:65,ar:'كرواتيا بقيادة مودريتش تمتلك خبرة لا تُقدر في المباريات الحاسمة. غانا منتخب موهوب ومندفع لكن الذكاء التكتيكي الكرواتي سيحسم.',en:'Croatia under Modrić possess invaluable experience in decisive games. Ghana are talented and energetic but Croatian tactical intelligence proves decisive.',ph:'Luka Modrić',pa:'Thomas Partey'},
+'Colombia||Portugal':{h:1,a:2,o:'away_win',c:73,ar:'البرتغال تمتلك رونالدو وراموس وعمقاً رائعاً في كل خط. كولومبيا ستقاوم بدياز وإريك كاريل لكن الجودة البرتغالية ستكون الفاصل.',en:'Portugal have Ronaldo, Ramos, and remarkable depth across every line. Colombia compete with Díaz and Castilla but Portuguese quality is ultimately the deciding factor.',ph:'Cristiano Ronaldo',pa:'Luis Díaz'},
+'DR Congo||Uzbekistan':{h:1,a:1,o:'draw',c:57,ar:'مباراة بين منتخبين في مستوى متقارب بعد سلسلة من النتائج المتذبذبة. التعادل يُعبر عن التوازن الحقيقي وكلا الطرفين يرضى بنقطة.',en:'A match between two genuinely equal sides after mixed results. A draw reflects the real balance — both teams will accept the point.',ph:'Chancel Mbemba',pa:'Eldor Shomurodov'},
+'Argentina||Jordan':{h:4,a:0,o:'home_win',c:97,ar:'الأرجنتين بميسي ولاواعز ودي بول أمام منتخب يشارك لأول مرة. مباراة من طرف واحد والأرجنتين ستحتفل بفارق كبير.',en:'Argentina with Messi, Lautaro, and De Paul vs. first-time qualifiers. A thoroughly one-sided affair — Argentina will celebrate with a big margin.',ph:'Lionel Messi',pa:'Musa Suleiman'},
+'Algeria||Austria':{h:1,a:2,o:'away_win',c:63,ar:'النمسا تمتلك تنظيماً أوروبياً ولاعبين في الدوريات الكبرى. الجزائر بمحرز ستقاوم لكن الصرامة الدفاعية النمساوية وقوة الهجوم ستحسم.',en:'Austria bring European organization and top-league quality. Algeria fight with Mahrez but Austrian defensive discipline and attacking power are decisive.',ph:'Marcel Sabitzer',pa:'Riyad Mahrez'}
+};
+
+const STGMAP={en:{'All':'All','Group Stage':'Group Stage','Round of 32':'Round of 32','Round of 16':'Round of 16','Quarterfinals':'Quarterfinals','Semifinals':'Semifinals','Third-Place Match':'Third-Place Match','Final':'Final'},ar:{'All':'الكل','Group Stage':'المجموعات','Round of 32':'دور الـ٣٢','Round of 16':'دور الـ١٦','Quarterfinals':'ربع النهائي','Semifinals':'نصف النهائي','Third-Place Match':'مباراة المركز الثالث','Final':'النهائي'}};
+
+const M=[
+[1,'20260611T190000Z','Thu Jun 11','A','Group Stage','Mexico','South Africa','Estadio Azteca','Mexico City'],
+[2,'20260612T020000Z','Thu Jun 11','A','Group Stage','South Korea','Czechia','Estadio Akron','Zapopan'],
+[3,'20260612T190000Z','Fri Jun 12','B','Group Stage','Canada','Bosnia & Herz.','BMO Field','Toronto'],
+[4,'20260613T010000Z','Fri Jun 12','D','Group Stage','USA','Paraguay','SoFi Stadium','Inglewood, CA'],
+[5,'20260613T190000Z','Sat Jun 13','B','Group Stage','Qatar','Switzerland',"Levi's Stadium",'Santa Clara, CA'],
+[6,'20260613T220000Z','Sat Jun 13','C','Group Stage','Brazil','Morocco','MetLife Stadium','E. Rutherford, NJ'],
+[7,'20260614T010000Z','Sat Jun 13','C','Group Stage','Haiti','Scotland','Gillette Stadium','Foxborough, MA'],
+[8,'20260614T040000Z','Sun Jun 14','D','Group Stage','Australia','Türkiye','BC Place','Vancouver'],
+[9,'20260614T170000Z','Sun Jun 14','E','Group Stage','Germany','Curaçao','NRG Stadium','Houston, TX'],
+[10,'20260614T200000Z','Sun Jun 14','F','Group Stage','Netherlands','Japan','AT&T Stadium','Arlington, TX'],
+[11,'20260614T230000Z','Sun Jun 14','E','Group Stage','Ivory Coast','Ecuador','Lincoln Financial','Philadelphia, PA'],
+[12,'20260615T020000Z','Sun Jun 14','F','Group Stage','Sweden','Tunisia','Estadio BBVA','Monterrey'],
+[13,'20260615T160000Z','Mon Jun 15','H','Group Stage','Spain','Cape Verde','Mercedes-Benz Stadium','Atlanta, GA'],
+[14,'20260615T190000Z','Mon Jun 15','G','Group Stage','Belgium','Egypt','Lumen Field','Seattle, WA'],
+[15,'20260615T220000Z','Mon Jun 15','H','Group Stage','Saudi Arabia','Uruguay','Hard Rock Stadium','Miami Gardens, FL'],
+[16,'20260616T010000Z','Mon Jun 15','G','Group Stage','Iran','New Zealand','SoFi Stadium','Inglewood, CA'],
+[17,'20260616T190000Z','Tue Jun 16','I','Group Stage','France','Senegal','MetLife Stadium','E. Rutherford, NJ'],
+[18,'20260616T220000Z','Tue Jun 16','I','Group Stage','Iraq','Norway','Gillette Stadium','Foxborough, MA'],
+[19,'20260617T010000Z','Tue Jun 16','J','Group Stage','Argentina','Algeria','Arrowhead Stadium','Kansas City, MO'],
+[20,'20260617T040000Z','Wed Jun 17','J','Group Stage','Austria','Jordan',"Levi's Stadium",'Santa Clara, CA'],
+[21,'20260617T170000Z','Wed Jun 17','K','Group Stage','Portugal','DR Congo','NRG Stadium','Houston, TX'],
+[22,'20260617T200000Z','Wed Jun 17','L','Group Stage','England','Croatia','AT&T Stadium','Arlington, TX'],
+[23,'20260617T230000Z','Wed Jun 17','L','Group Stage','Ghana','Panama','BMO Field','Toronto'],
+[24,'20260618T020000Z','Wed Jun 17','K','Group Stage','Uzbekistan','Colombia','Estadio Azteca','Mexico City'],
+[25,'20260618T160000Z','Thu Jun 18','A','Group Stage','Czechia','South Africa','Mercedes-Benz Stadium','Atlanta, GA'],
+[26,'20260618T190000Z','Thu Jun 18','B','Group Stage','Switzerland','Bosnia & Herz.','SoFi Stadium','Inglewood, CA'],
+[27,'20260618T220000Z','Thu Jun 18','B','Group Stage','Canada','Qatar','BC Place','Vancouver'],
+[28,'20260619T010000Z','Thu Jun 18','A','Group Stage','Mexico','South Korea','Estadio Akron','Zapopan'],
+[29,'20260619T190000Z','Fri Jun 19','D','Group Stage','USA','Australia','Lumen Field','Seattle, WA'],
+[30,'20260619T220000Z','Fri Jun 19','C','Group Stage','Scotland','Morocco','Gillette Stadium','Foxborough, MA'],
+[31,'20260620T003000Z','Fri Jun 19','C','Group Stage','Brazil','Haiti','Lincoln Financial','Philadelphia, PA'],
+[32,'20260620T030000Z','Fri Jun 19','D','Group Stage','Türkiye','Paraguay',"Levi's Stadium",'Santa Clara, CA'],
+[33,'20260620T170000Z','Sat Jun 20','F','Group Stage','Netherlands','Sweden','NRG Stadium','Houston, TX'],
+[34,'20260620T200000Z','Sat Jun 20','E','Group Stage','Germany','Ivory Coast','BMO Field','Toronto'],
+[35,'20260621T000000Z','Sat Jun 20','E','Group Stage','Ecuador','Curaçao','Arrowhead Stadium','Kansas City, MO'],
+[36,'20260621T040000Z','Sun Jun 21','F','Group Stage','Tunisia','Japan','Estadio BBVA','Monterrey'],
+[37,'20260621T160000Z','Sun Jun 21','H','Group Stage','Spain','Saudi Arabia','Mercedes-Benz Stadium','Atlanta, GA'],
+[38,'20260621T190000Z','Sun Jun 21','G','Group Stage','Belgium','Iran','SoFi Stadium','Inglewood, CA'],
+[39,'20260621T220000Z','Sun Jun 21','H','Group Stage','Uruguay','Cape Verde','Hard Rock Stadium','Miami Gardens, FL'],
+[40,'20260622T010000Z','Sun Jun 21','G','Group Stage','New Zealand','Egypt','BC Place','Vancouver'],
+[41,'20260622T170000Z','Mon Jun 22','J','Group Stage','Argentina','Austria','AT&T Stadium','Arlington, TX'],
+[42,'20260622T210000Z','Mon Jun 22','I','Group Stage','France','Iraq','Lincoln Financial','Philadelphia, PA'],
+[43,'20260623T000000Z','Mon Jun 22','I','Group Stage','Norway','Senegal','MetLife Stadium','E. Rutherford, NJ'],
+[44,'20260623T030000Z','Mon Jun 22','J','Group Stage','Jordan','Algeria',"Levi's Stadium",'Santa Clara, CA'],
+[45,'20260623T170000Z','Tue Jun 23','K','Group Stage','Portugal','Uzbekistan','NRG Stadium','Houston, TX'],
+[46,'20260623T200000Z','Tue Jun 23','L','Group Stage','England','Ghana','Gillette Stadium','Foxborough, MA'],
+[47,'20260623T230000Z','Tue Jun 23','L','Group Stage','Panama','Croatia','BMO Field','Toronto'],
+[48,'20260624T020000Z','Tue Jun 23','K','Group Stage','Colombia','DR Congo','Estadio Akron','Zapopan'],
+[49,'20260624T190000Z','Wed Jun 24','B','Group Stage','Switzerland','Canada','BC Place','Vancouver'],
+[50,'20260624T190000Z','Wed Jun 24','B','Group Stage','Bosnia & Herz.','Qatar','Lumen Field','Seattle, WA'],
+[51,'20260624T220000Z','Wed Jun 24','C','Group Stage','Scotland','Brazil','Hard Rock Stadium','Miami Gardens, FL'],
+[52,'20260624T220000Z','Wed Jun 24','C','Group Stage','Morocco','Haiti','Mercedes-Benz Stadium','Atlanta, GA'],
+[53,'20260625T010000Z','Wed Jun 24','A','Group Stage','Czechia','Mexico','Estadio Azteca','Mexico City'],
+[54,'20260625T010000Z','Wed Jun 24','A','Group Stage','South Africa','South Korea','Estadio BBVA','Monterrey'],
+[55,'20260625T200000Z','Thu Jun 25','E','Group Stage','Curaçao','Ivory Coast','Lincoln Financial','Philadelphia, PA'],
+[56,'20260625T200000Z','Thu Jun 25','E','Group Stage','Ecuador','Germany','MetLife Stadium','E. Rutherford, NJ'],
+[57,'20260625T230000Z','Thu Jun 25','F','Group Stage','Japan','Sweden','AT&T Stadium','Arlington, TX'],
+[58,'20260625T230000Z','Thu Jun 25','F','Group Stage','Tunisia','Netherlands','Arrowhead Stadium','Kansas City, MO'],
+[59,'20260626T020000Z','Thu Jun 25','D','Group Stage','Türkiye','USA','SoFi Stadium','Inglewood, CA'],
+[60,'20260626T020000Z','Thu Jun 25','D','Group Stage','Paraguay','Australia',"Levi's Stadium",'Santa Clara, CA'],
+[61,'20260626T190000Z','Fri Jun 26','I','Group Stage','Norway','France','Gillette Stadium','Foxborough, MA'],
+[62,'20260626T190000Z','Fri Jun 26','I','Group Stage','Senegal','Iraq','BMO Field','Toronto'],
+[63,'20260627T000000Z','Fri Jun 26','H','Group Stage','Cape Verde','Saudi Arabia','NRG Stadium','Houston, TX'],
+[64,'20260627T000000Z','Fri Jun 26','H','Group Stage','Uruguay','Spain','Estadio Akron','Zapopan'],
+[65,'20260627T030000Z','Fri Jun 26','G','Group Stage','Egypt','Iran','Lumen Field','Seattle, WA'],
+[66,'20260627T030000Z','Fri Jun 26','G','Group Stage','New Zealand','Belgium','BC Place','Vancouver'],
+[67,'20260627T210000Z','Sat Jun 27','L','Group Stage','Panama','England','MetLife Stadium','E. Rutherford, NJ'],
+[68,'20260627T210000Z','Sat Jun 27','L','Group Stage','Croatia','Ghana','Lincoln Financial','Philadelphia, PA'],
+[69,'20260627T233000Z','Sat Jun 27','K','Group Stage','Colombia','Portugal','Hard Rock Stadium','Miami Gardens, FL'],
+[70,'20260627T233000Z','Sat Jun 27','K','Group Stage','DR Congo','Uzbekistan','Mercedes-Benz Stadium','Atlanta, GA'],
+[71,'20260628T020000Z','Sat Jun 27','J','Group Stage','Argentina','Jordan','MetLife Stadium','E. Rutherford, NJ'],
+[72,'20260628T020000Z','Sat Jun 27','J','Group Stage','Algeria','Austria',"Levi's Stadium",'Santa Clara, CA'],
+[73,'20260628T190000Z','Sun Jun 28','—','Round of 32','Winner Group C','Runner-up TBD','SoFi Stadium','Inglewood, CA'],
+[74,'20260629T170000Z','Mon Jun 29','—','Round of 32','Winner Group A','3rd Place TBD','Arrowhead Stadium','Kansas City, MO'],
+[75,'20260629T210000Z','Mon Jun 29','—','Round of 32','Winner Group E','Runner-up Group F','AT&T Stadium','Arlington, TX'],
+[76,'20260630T170000Z','Tue Jun 30','—','Round of 32','Winner Group F','3rd Place TBD','NRG Stadium','Houston, TX'],
+[77,'20260701T170000Z','Wed Jul 1','—','Round of 32','Winner Group G','3rd Place TBD','Lumen Field','Seattle, WA'],
+[78,'20260702T190000Z','Thu Jul 2','—','Round of 32','Winner Group H','Runner-up Group J','SoFi Stadium','Inglewood, CA'],
+[79,'20260703T220000Z','Fri Jul 3','—','Round of 32','Winner Group J','Runner-up Group H','Hard Rock Stadium','Miami Gardens, FL'],
+[80,'20260704T170000Z','Sat Jul 4','—','Round of 16','R16 Match TBD','R16 Match TBD','NRG Stadium','Houston, TX'],
+[81,'20260705T170000Z','Sun Jul 5','—','Round of 16','R16 Match TBD','R16 Match TBD','MetLife Stadium','E. Rutherford, NJ'],
+[82,'20260709T190000Z','Thu Jul 9','—','Quarterfinals','QF-1 TBD','QF-1 TBD','MetLife Stadium','E. Rutherford, NJ'],
+[83,'20260710T190000Z','Fri Jul 10','—','Quarterfinals','QF-2 TBD','QF-2 TBD','NRG Stadium','Houston, TX'],
+[84,'20260714T190000Z','Tue Jul 14','—','Semifinals','SF-1 TBD','SF-1 TBD','MetLife Stadium','E. Rutherford, NJ'],
+[85,'20260715T190000Z','Wed Jul 15','—','Semifinals','SF-2 TBD','SF-2 TBD','AT&T Stadium','Arlington, TX'],
+[86,'20260718T190000Z','Sat Jul 18','—','Third-Place Match','3rd Place','3rd Place','Hard Rock Stadium','Miami Gardens, FL'],
+[87,'20260719T190000Z','Sun Jul 19','—','Final','World Cup Final','World Cup Final','MetLife Stadium','E. Rutherford, NJ'],
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let aTz='ET', aStg='All', aGrp='All', aSrch='', aLang='en';
+const S=()=>STR[aLang];
+
+// ── LANG ──────────────────────────────────────────────────────────────────────
+function setLang(l){
+  aLang=l;
+  const body=document.getElementById('BODY');
+  body.classList.toggle('ar',l==='ar');
+  document.getElementById('root').lang=l==='ar'?'ar':'en';
+  document.getElementById('lb-en').classList.toggle('active',l==='en');
+  document.getElementById('lb-ar').classList.toggle('active',l==='ar');
+  updateStaticStrings();
+  rebuildFilters();
+  render();
+}
+
+function updateStaticStrings(){
+  const s=S();
+  document.getElementById('hSub').textContent=s.sub;
+  document.getElementById('hHosts').innerHTML=
+    '<div class="host-badge"><img src="https://flagcdn.com/h20/us.png" onerror="this.style.display=\'none\'"> '+s.hUSA+'</div>'+
+    '<div class="host-badge"><img src="https://flagcdn.com/h20/ca.png" onerror="this.style.display=\'none\'"> '+s.hCA+'</div>'+
+    '<div class="host-badge"><img src="https://flagcdn.com/h20/mx.png" onerror="this.style.display=\'none\'"> '+s.hMX+'</div>';
+  document.getElementById('st-teams').textContent=s.stTeams;
+  document.getElementById('st-groups').textContent=s.stGroups;
+  document.getElementById('st-matches').textContent=s.stMatches;
+  document.getElementById('st-stadiums').textContent=s.stStadiums;
+  document.getElementById('st-ai').textContent=s.stAI;
+  document.getElementById('fl-search').textContent=s.flSearch;
+  document.getElementById('fl-stage').textContent=s.flStage;
+  document.getElementById('fl-group').textContent=s.flGroup;
+  document.getElementById('SI').placeholder=s.srchPh;
+  document.getElementById('tz-cairo').textContent=s.tzCairo;
+  document.getElementById('toast').textContent=s.toast;
+}
+
+function rebuildFilters(){
+  const s=S();
+  const stageKeys=['All','Group Stage','R32','R16','QF','SF','Final'];
+  const stageVals=['All','Group Stage','Round of 32','Round of 16','Quarterfinals','Semifinals','Final'];
+  document.getElementById('SP').innerHTML=s.pills.map((lbl,i)=>
+    '<div class="pill'+(aStg===stageVals[i]?' active':'')+'" onclick="setStage(\''+stageVals[i]+'\')">'+lbl+'</div>'
+  ).join('');
+  const grps=['All','A','B','C','D','E','F','G','H','I','J','K','L'];
+  const grpLabels=[s.grpAll,'A','B','C','D','E','F','G','H','I','J','K','L'];
+  document.getElementById('GP').innerHTML=grps.map((g,i)=>
+    '<div class="pill'+(aGrp===g?' active':'')+'" onclick="setGroup(\''+g+'\')">'+grpLabels[i]+'</div>'
+  ).join('');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function pUtc(s){const x=s.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);if(!x)return null;return new Date(x[1]+'-'+x[2]+'-'+x[3]+'T'+x[4]+':'+x[5]+':'+x[6]+'Z');}
+function fT(u,tz){const d=pUtc(u);if(!d)return'--';return d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:{ET:'America/New_York',Cairo:'Africa/Cairo'}[tz]});}
+function fDL(u,tz){const d=pUtc(u);if(!d)return'';return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:{ET:'America/New_York',Cairo:'Africa/Cairo'}[tz]});}
+function aH(u,h){const d=pUtc(u);if(!d)return u;return new Date(d.getTime()+h*3600000).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';}
+
+function gcal(idx){const[,utc,,group,stage,home,away,venue,city]=M[idx];const end=aH(utc,2);const t=encodeURIComponent(home+' vs '+away+' - FIFA WC 2026');const dt=encodeURIComponent(stage+(group!=='—'?' | Group '+group:'')+'\nVenue: '+venue+', '+city);const l=encodeURIComponent(venue+', '+city);window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text='+t+'&dates='+utc+'/'+end+'&details='+dt+'&location='+l,'_blank');showToast();}
+function gcalAll(arr){arr.forEach((idx,i)=>setTimeout(()=>gcal(idx),i*350));showToast();}
+function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+
+// ── PREDICTION ────────────────────────────────────────────────────────────────
+function togglePred(idx){
+  const[,,,group,stage,home,away]=M[idx];
+  const panel=document.getElementById('pp'+idx);
+  const btn=document.getElementById('pb'+idx);
+  if(!panel||!btn)return;
+  if(panel.style.display!=='none'){panel.style.display='none';btn.classList.remove('active-pred');return;}
+  const key=home+'||'+away;
+  const p=PREDS[key];
+  if(!p){
+    panel.innerHTML='<div style="text-align:center;padding:10px;font-size:12px;color:var(--sub)">'+S().noKoPred+'</div>';
+    panel.style.display='block';btn.classList.add('active-pred');return;
+  }
+  const hc=FLAGS[home],ac=FLAGS[away];
+  const hF=hc?'<img class="pred-flag-sm" src="https://flagcdn.com/w80/'+hc+'.png" onerror="this.style.display=\'none\'">':'';
+  const aF=ac?'<img class="pred-flag-sm" src="https://flagcdn.com/w80/'+ac+'.png" onerror="this.style.display=\'none\'">':'';
+  const hs=home.length>12?home.slice(0,11)+'…':home;
+  const as=away.length>12?away.slice(0,11)+'…':away;
+  let ot,oc;
+  const s=S();
+  if(p.o==='home_win'){ot=s.winPfx+' '+hs;oc='wh';}
+  else if(p.o==='away_win'){ot=s.winPfx+' '+as;oc='wa';}
+  else{ot=s.drawTxt;oc='wd';}
+  const conf=Math.min(95,Math.max(50,p.c||70));
+  const analysisText=aLang==='ar'?p.ar:p.en;
+  const analysisClass=aLang==='ar'?'pred-analysis':'pred-analysis-en';
+  panel.style.display='block';
+  btn.classList.add('active-pred');
+  panel.innerHTML='<div class="pred-header"><span>🔮</span><span class="pred-header-txt">'+s.predHdr+'</span></div>'
+    +'<div class="pred-score-row"><div class="pred-team">'+hF+'<div class="pred-snum">'+p.h+'</div><div style="font-size:10px;color:var(--sub)">'+hs+'</div></div>'
+    +'<div class="pred-dash">–</div>'
+    +'<div class="pred-team">'+aF+'<div class="pred-snum">'+p.a+'</div><div style="font-size:10px;color:var(--sub)">'+as+'</div></div></div>'
+    +'<div class="pred-outcome"><span class="outcome-badge '+oc+'">'+ot+'</span></div>'
+    +'<div class="'+analysisClass+'">'+analysisText+'</div>'
+    +'<div class="pred-stars">⭐ '+p.ph+' &nbsp;'+s.starsSep+'&nbsp; ⭐ '+p.pa+'</div>'
+    +'<div class="pred-conf-row"><span>'+s.predConf+'</span><div class="conf-bar"><div class="conf-fill" id="cf'+idx+'" style="width:0%"></div></div><span class="conf-pct">'+conf+'%</span></div>';
+  setTimeout(()=>{const cf=document.getElementById('cf'+idx);if(cf)cf.style.width=conf+'%';},50);
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────────
+function setTz(tz){aTz=tz;document.getElementById('tz-et').classList.toggle('active',tz==='ET');document.getElementById('tz-cairo').classList.toggle('active',tz==='Cairo');render();}
+function setStage(s){aStg=s;rebuildFilters();if(s!=='Group Stage'&&s!=='All'){aGrp='All';}render();}
+function setGroup(g){aGrp=g;if(g!=='All')aStg='All';rebuildFilters();render();}
+function applyFilters(){aSrch=document.getElementById('SI').value.toLowerCase();render();}
+function getF(){return M.map((m,i)=>({m,i})).filter(({m})=>{const[,,,g,st,h,a]=m;if(aStg!=='All'&&st!==aStg)return false;if(aGrp!=='All'&&g!==aGrp)return false;if(aSrch&&!h.toLowerCase().includes(aSrch)&&!a.toLowerCase().includes(aSrch))return false;return true;});}
+
+// ── FLAG HTML ─────────────────────────────────────────────────────────────────
+let _fc=0;
+function fH(name){const url=fu(name);const id='f'+(++_fc);if(!url)return'<div class="flag-wrap"><div class="flag-ph">🏳️</div></div>';return'<div class="flag-wrap"><div class="flag-ph" id="'+id+'p">⏳</div><img class="flag-img" src="'+url+'" alt="'+name+'" onload="this.classList.add(\'ok\');var p=document.getElementById(\''+id+'p\');if(p)p.classList.add(\'gone\')" onerror="var p=document.getElementById(\''+id+'p\');if(p)p.textContent=\'🏳️\'"></div>';}
+
+// ── BUILD CARD ────────────────────────────────────────────────────────────────
+function bCard(m,idx){
+  const[,utc,,group,stage,home,away,venue,city]=m;
+  const gc=GC[group]||'#888';
+  const time=fT(utc,aTz),tzL=aTz==='Cairo'?S().tzCairo.replace(/🇪🇬 /,''):'ET';
+  const dL=fDL(utc,aTz);
+  const s=S();
+  const hs=home.length>14?home.slice(0,13)+'…':home;
+  const as=away.length>14?away.slice(0,13)+'…':away;
+  const grpLabel=group!=='—'?'Group '+group:(STGMAP[aLang][stage]||stage);
+  const vfc=VFLAGS[venue];
+  const vfHtml=vfc?'<img class="venue-flag" src="https://flagcdn.com/w20/'+vfc+'.png" onerror="this.style.display=\'none\'">':'';
+  return'<div class="card">'
+  +'<div class="card-top"><span class="group-badge" style="color:'+gc+';border-color:'+gc+';background:'+gc+'1a">'+grpLabel+'</span><span class="stage-tag">'+(stage!=='Group Stage'?s.koLabel:'')+'</span></div>'
+  +'<div class="card-body"><div class="team">'+fH(home)+'<div class="team-name">'+hs+'</div></div><div class="vs-block"><div class="vs">VS</div></div><div class="team">'+fH(away)+'<div class="team-name">'+as+'</div></div></div>'
+  +'<div class="card-footer"><div class="time-venue">'
+  +'<div class="match-time">⏱ '+time+' <span class="tz-label">'+tzL+'</span></div>'
+  +(aTz==='Cairo'?'<div class="match-date-local">'+dL+s.cairoPh+'</div>':'')
+  +'<div class="match-venue">'+vfHtml+'📍 '+venue+', '+city+'</div>'
+  +'</div>'
+  +'<div class="btn-row">'
+  +'<button class="pred-btn" id="pb'+idx+'" onclick="togglePred('+idx+')">'+s.predBtn+'</button>'
+  +'<button class="gcal-btn" onclick="gcal('+idx+')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>'+s.calBtn+'</button>'
+  +'</div></div>'
+  +'<div class="pred-panel" id="pp'+idx+'" style="display:none"></div>'
+  +'</div>';
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render(){
+  const filtered=getF();
+  const main=document.getElementById('MC');
+  if(!filtered.length){main.innerHTML='<div class="no-results"><div style="font-size:48px">🔍</div><p style="font-size:16px;color:var(--sub);margin-top:12px">'+S().noRes+'</p></div>';return;}
+  const allKo=filtered.every(({m})=>m[4]!=='Group Stage');
+  let html='';
+  const s=S();
+  if(allKo){
+    const ord=['Round of 32','Round of 16','Quarterfinals','Semifinals','Third-Place Match','Final'];
+    const bS={};filtered.forEach(({m,i})=>{if(!bS[m[4]])bS[m[4]]=[];bS[m[4]].push({m,i});});
+    ord.forEach(st=>{if(!bS[st])return;const it=bS[st];const lbl=STGMAP[aLang][st]||st;
+      html+='<div class="date-group"><div class="date-header"><div class="date-label">'+lbl+'</div><div class="date-count">'+it.length+' '+s.cnt+'</div><div class="date-header-line"></div>'+(it.length>1?'<button class="gcal-add-all" onclick="gcalAll(['+it.map(x=>x.i)+'])">'+s.addAll+'</button>':'')+'</div><div class="matches-grid">'+it.map(({m,i})=>bCard(m,i)).join('')+'</div></div>';});
+  }else{
+    const grps={};
+    filtered.forEach(({m,i})=>{const k=m[4]==='Group Stage'?m[2]:fDL(m[1],aTz);if(!grps[k])grps[k]=[];grps[k].push({m,i});});
+    Object.keys(grps).forEach(dk=>{const it=grps[dk];
+      html+='<div class="date-group"><div class="date-header"><div class="date-label">'+dk+'</div><div class="date-count">'+it.length+' '+s.cnt+'</div><div class="date-header-line"></div>'+(it.length>1?'<button class="gcal-add-all" onclick="gcalAll(['+it.map(x=>x.i)+'])">'+s.addAll+'</button>':'')+'</div><div class="matches-grid">'+it.map(({m,i})=>bCard(m,i)).join('')+'</div></div>';});
+  }
+  main.innerHTML=html;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+updateStaticStrings();
+rebuildFilters();
+render();
+</script>
+</body>
+</html>
