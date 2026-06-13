@@ -84,8 +84,42 @@ body.ar .stage-tag{text-transform:none;font-family:'Cairo',sans-serif;font-size:
 .flag-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg3);border-radius:5px;border:2px solid var(--border);font-size:18px;transition:opacity .3s}
 .flag-ph.gone{opacity:0;pointer-events:none}
 .team-name{font-size:11px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;color:var(--text)}
-.vs-block{display:flex;flex-direction:column;align-items:center;padding:0 4px;flex-shrink:0}
+.vs-block{display:flex;flex-direction:column;align-items:center;padding:0 4px;flex-shrink:0;min-width:60px}
 .vs{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--sub);line-height:1}
+/* live score */
+.score-nums{font-family:'Bebas Neue',sans-serif;font-size:26px;color:#fff;letter-spacing:2px;line-height:1;white-space:nowrap}
+.live-badge{display:flex;align-items:center;gap:4px;background:rgba(255,59,92,.15);border:1px solid rgba(255,59,92,.4);border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--red);margin-bottom:2px}
+.live-dot{width:6px;height:6px;background:var(--red);border-radius:50%;flex-shrink:0;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.ft-badge{font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:2px}
+.ht-badge{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px;margin-bottom:2px}
+.et-badge{font-size:10px;font-weight:700;color:#a78bfa;letter-spacing:1px;margin-bottom:2px}
+/* refresh bar */
+.refresh-bar{background:var(--bg3);border-bottom:1px solid var(--border);padding:5px 24px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.live-pill{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid}
+.live-pill.ok{color:var(--green);border-color:rgba(0,232,122,.3);background:rgba(0,232,122,.08)}
+.live-pill.err{color:var(--red);border-color:rgba(255,59,92,.3);background:rgba(255,59,92,.08)}
+.live-pill.loading{color:var(--sub);border-color:var(--border)}
+.refresh-info{font-size:10px;color:var(--sub)}
+.stand-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 14px;font-size:12px;color:var(--sub);cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
+.stand-btn:hover,.stand-btn.open{border-color:var(--gold);color:var(--gold)}
+/* standings panel */
+.stand-wrap{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 24px;animation:fadeIn .3s ease}
+.stand-inner{max-width:1200px;margin:0 auto}
+.stand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.stand-group{background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.stand-grp-hdr{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;padding:7px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.stand-table{width:100%;border-collapse:collapse;font-size:11px}
+.stand-table th{padding:4px 6px;color:var(--sub);font-weight:600;text-align:center;font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.stand-table th:first-child{text-align:left}
+.stand-table td{padding:5px 6px;text-align:center;border-bottom:1px solid rgba(30,47,71,.5)}
+.stand-table td:first-child{text-align:left;display:flex;align-items:center;gap:6px}
+.stand-table tr:last-child td{border-bottom:none}
+.stand-pos{color:var(--sub);font-size:10px;min-width:12px}
+.stand-flag{width:18px;height:12px;object-fit:cover;border-radius:2px;border:1px solid var(--border);flex-shrink:0}
+.stand-pts{font-weight:700;color:var(--green)}
+.stand-q{background:rgba(0,232,122,.08);} /* qualification zone */
+.no-stand{text-align:center;padding:20px;font-size:12px;color:var(--sub)}
 .card-footer{border-top:1px solid var(--border);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .time-venue{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
 .match-time{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--green);letter-spacing:.5px;line-height:1}
@@ -156,12 +190,22 @@ body.ar .toast{right:auto;left:24px}
 
 <div class="stats-bar">
   <div class="stats-inner">
+
     <div class="stat"><div class="stat-num">48</div><div class="stat-lbl" id="st-teams"></div></div>
     <div class="stat"><div class="stat-num">12</div><div class="stat-lbl" id="st-groups"></div></div>
     <div class="stat"><div class="stat-num">104</div><div class="stat-lbl" id="st-matches"></div></div>
     <div class="stat"><div class="stat-num">16</div><div class="stat-lbl" id="st-stadiums"></div></div>
     <div class="stat"><div class="stat-num">🔮</div><div class="stat-lbl" id="st-ai"></div></div>
   </div>
+</div>
+
+<div class="refresh-bar" id="refreshBar">
+  <div class="live-pill loading" id="livePill">⏳ <span id="livePillTxt">Connecting to live data…</span></div>
+  <div class="refresh-info" id="lastUpdated"></div>
+  <button class="stand-btn" id="standBtn" onclick="toggleStandings()">📊 <span id="standBtnTxt">Group Standings</span></button>
+</div>
+<div id="standWrap" style="display:none" class="stand-wrap">
+  <div class="stand-inner"><div class="stand-grid" id="standGrid"><div class="no-stand">Loading standings…</div></div></div>
 </div>
 
 <div class="filters-wrap">
@@ -236,6 +280,156 @@ const FLAGS={Mexico:'mx','South Africa':'za','South Korea':'kr',Czechia:'cz',Can
 const GC={A:'#e74c3c',B:'#3b82f6',C:'#22c55e',D:'#f59e0b',E:'#a855f7',F:'#06b6d4',G:'#f97316',H:'#ec4899',I:'#14b8a6',J:'#84cc16',K:'#ef4444',L:'#8b5cf6'};
 const VFLAGS={'Estadio Azteca':'mx','Estadio Akron':'mx','Estadio BBVA':'mx','BMO Field':'ca','BC Place':'ca','SoFi Stadium':'us',"Levi's Stadium":'us','MetLife Stadium':'us','Gillette Stadium':'us','NRG Stadium':'us','AT&T Stadium':'us','Lincoln Financial':'us','Lumen Field':'us','Hard Rock Stadium':'us','Mercedes-Benz Stadium':'us','Arrowhead Stadium':'us'};
 const fu=n=>{const c=FLAGS[n];return c?'https://flagcdn.com/w80/'+c+'.png':null};
+
+// ── LIVE DATA (football-data.org) ─────────────────────────────────────────────
+const API_KEY='20e69677471940a79568df3b175b8746';
+const API='https://api.football-data.org/v4';
+const liveData={};       // key: 'Home||Away' → {status,hs,as,min}
+const standingsData={};  // key: 'GROUP_A' → [{pos,team,p,w,d,l,gf,ga,gd,pts}]
+let standOpen=false;
+let refreshTimer=null;
+
+// API name → our name
+const TMAP={
+  'Korea Republic':'South Korea','Bosnia and Herzegovina':'Bosnia & Herz.',
+  'Bosnia & Herzegovina':'Bosnia & Herz.','Turkey':'Türkiye',
+  "Côte d'Ivoire":'Ivory Coast','Cote d\'Ivoire':'Ivory Coast',
+  'Congo DR':'DR Congo','Congo, DR':'DR Congo',
+  'Democratic Republic of Congo':'DR Congo',
+  'Republic of Congo':'DR Congo',
+  'Curacao':'Curaçao','Curaçao':'Curaçao',
+  'Cape Verde Islands':'Cape Verde',
+  'Iran (Islamic Republic of)':'Iran',
+  'Korea DPR':'North Korea',
+  'USA':'USA','United States':'USA',
+  'England':'England','Scotland':'Scotland',
+};
+const tName=n=>TMAP[n]||n;
+
+async function fetchLiveData(){
+  setLivePill('loading','⏳ Updating…');
+  try{
+    const res=await fetch(API+'/competitions/WC/matches',{
+      headers:{'X-Auth-Token':API_KEY,'X-Unfold-Goals':'true'}
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    Object.keys(liveData).forEach(k=>delete liveData[k]);
+    (data.matches||[]).forEach(m=>{
+      const h=tName(m.homeTeam?.name||'');
+      const a=tName(m.awayTeam?.name||'');
+      const key=h+'||'+a;
+      const ft=m.score?.fullTime;
+      const ht=m.score?.halfTime;
+      const reg=m.score?.regularTime;
+      liveData[key]={
+        status:m.status,
+        hs: ft?.home??reg?.home??ht?.home??null,
+        as: ft?.away??reg?.away??ht?.away??null,
+        hths:ht?.home??null, htas:ht?.away??null,
+        min:m.minute||null,
+        inj:m.injuryTime||null,
+        apiId:m.id
+      };
+    });
+    const now=new Date();
+    const t=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'Africa/Cairo'});
+    document.getElementById('lastUpdated').textContent='Last updated: '+t+' Cairo';
+    const liveCount=Object.values(liveData).filter(d=>d.status==='IN_PLAY'||d.status==='PAUSED'||d.status==='HALF_TIME').length;
+    if(liveCount>0){setLivePill('ok','🔴 '+liveCount+' LIVE');}
+    else{setLivePill('ok','✅ Live data connected');}
+    render();
+  }catch(e){
+    setLivePill('err','⚠️ '+e.message.slice(0,40));
+    document.getElementById('lastUpdated').textContent='Retrying in 60s…';
+  }
+}
+
+async function fetchStandings(){
+  try{
+    const res=await fetch(API+'/competitions/WC/standings',{
+      headers:{'X-Auth-Token':API_KEY}
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    Object.keys(standingsData).forEach(k=>delete standingsData[k]);
+    (data.standings||[]).forEach(sg=>{
+      if(sg.type==='TOTAL') standingsData[sg.group]=sg.table;
+    });
+    renderStandings();
+  }catch(e){
+    document.getElementById('standGrid').innerHTML='<div class="no-stand">⚠️ Standings unavailable: '+e.message.slice(0,50)+'</div>';
+  }
+}
+
+function setLivePill(cls,txt){
+  const p=document.getElementById('livePill');
+  const s=document.getElementById('livePillTxt');
+  if(p){p.className='live-pill '+cls;}
+  if(s)s.textContent=txt;
+}
+
+function toggleStandings(){
+  standOpen=!standOpen;
+  const w=document.getElementById('standWrap');
+  const b=document.getElementById('standBtn');
+  if(w)w.style.display=standOpen?'block':'none';
+  if(b)b.classList.toggle('open',standOpen);
+  if(standOpen&&!Object.keys(standingsData).length) fetchStandings();
+}
+
+function renderStandings(){
+  const grid=document.getElementById('standGrid');
+  if(!grid)return;
+  const groups=['GROUP_A','GROUP_B','GROUP_C','GROUP_D','GROUP_E','GROUP_F','GROUP_G','GROUP_H','GROUP_I','GROUP_J','GROUP_K','GROUP_L'];
+  const gNames={GROUP_A:'A',GROUP_B:'B',GROUP_C:'C',GROUP_D:'D',GROUP_E:'E',GROUP_F:'F',GROUP_G:'G',GROUP_H:'H',GROUP_I:'I',GROUP_J:'J',GROUP_K:'K',GROUP_L:'L'};
+  const gc2=GC;
+  let html='';
+  let found=false;
+  groups.forEach(gk=>{
+    const table=standingsData[gk];
+    if(!table||!table.length)return;
+    found=true;
+    const col=gc2[gNames[gk]]||'#888';
+    html+='<div class="stand-group"><div class="stand-grp-hdr" style="color:'+col+'">⬡ Group '+gNames[gk]+'</div>';
+    html+='<table class="stand-table"><tr><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>';
+    table.forEach((row,i)=>{
+      const fc=FLAGS[tName(row.team?.name||'')];
+      const fImg=fc?'<img class="stand-flag" src="https://flagcdn.com/w20/'+fc+'.png" onerror="this.style.display=\'none\'">':'';
+      const qClass=i<2?' class="stand-q"':'';
+      const gd=(row.goalDifference>0?'+':'')+row.goalDifference;
+      html+='<tr'+qClass+'><td><span class="stand-pos">'+row.position+'</span>'+fImg+tName(row.team?.name||'—')+'</td><td>'+row.playedGames+'</td><td>'+row.won+'</td><td>'+row.draw+'</td><td>'+row.lost+'</td><td>'+gd+'</td><td class="stand-pts">'+row.points+'</td></tr>';
+    });
+    html+='</table></div>';
+  });
+  grid.innerHTML=found?html:'<div class="no-stand">Standings not yet available — matches must begin first.</div>';
+}
+
+// score block for card
+function scoreBlock(home,away){
+  const key=home+'||'+away;
+  const d=liveData[key];
+  if(!d||d.status==='SCHEDULED'||d.status==='TIMED'||d.hs===null){
+    return '<div class="vs-block"><div class="vs">VS</div></div>';
+  }
+  const hs=d.hs??'-', as=d.as??'-';
+  const st=d.status;
+  if(st==='IN_PLAY'||st==='PAUSED'){
+    const minTxt=d.min?(d.min+(d.inj?'+'+d.inj:''))+"'":'';
+    return '<div class="vs-block"><div class="live-badge"><div class="live-dot"></div>'+minTxt+'</div><div class="score-nums">'+hs+' – '+as+'</div></div>';
+  }
+  if(st==='HALF_TIME'){
+    return '<div class="vs-block"><div class="ht-badge">HT</div><div class="score-nums">'+hs+' – '+as+'</div></div>';
+  }
+  if(st==='EXTRA_TIME'||st==='PENALTY_SHOOTOUT'){
+    const lbl=st==='PENALTY_SHOOTOUT'?'PEN':'ET';
+    return '<div class="vs-block"><div class="et-badge">'+lbl+'</div><div class="score-nums">'+hs+' – '+as+'</div></div>';
+  }
+  if(st==='FINISHED'||st==='AWARDED'){
+    return '<div class="vs-block"><div class="ft-badge">FT ✓</div><div class="score-nums">'+hs+' – '+as+'</div></div>';
+  }
+  return '<div class="vs-block"><div class="vs">VS</div></div>';
+}
 
 const PREDS={
 'Mexico||South Africa':{h:2,a:0,o:'home_win',c:78,ar:'المكسيك تستفيد من لعبها في الأستيكا أمام جمهور ساخن ودعم لا محدود. جنوب أفريقيا ستقاتل بشجاعة لكن التفوق التقني المكسيكي سيحسم الفارق.',en:"Mexico's home advantage at Azteca is massive with electric crowd support. South Africa will fight hard but Mexico's technical quality wins out.",ph:'Hirving Lozano',pa:'Percy Tau'},
@@ -439,6 +633,8 @@ function updateStaticStrings(){
   document.getElementById('SI').placeholder=s.srchPh;
   document.getElementById('tz-cairo').textContent=s.tzCairo;
   document.getElementById('toast').textContent=s.toast;
+  const sb=document.getElementById('standBtnTxt');
+  if(sb)sb.textContent=aLang==='ar'?'📊 جدول المجموعات':'📊 Group Standings';
 }
 
 function rebuildFilters(){
@@ -529,7 +725,7 @@ function bCard(m,idx){
   const vfHtml=vfc?'<img class="venue-flag" src="https://flagcdn.com/w20/'+vfc+'.png" onerror="this.style.display=\'none\'">':'';
   return'<div class="card">'
   +'<div class="card-top"><span class="group-badge" style="color:'+gc+';border-color:'+gc+';background:'+gc+'1a">'+grpLabel+'</span><span class="stage-tag">'+(stage!=='Group Stage'?s.koLabel:'')+'</span></div>'
-  +'<div class="card-body"><div class="team">'+fH(home)+'<div class="team-name">'+hs+'</div></div><div class="vs-block"><div class="vs">VS</div></div><div class="team">'+fH(away)+'<div class="team-name">'+as+'</div></div></div>'
+  +'<div class="card-body"><div class="team">'+fH(home)+'<div class="team-name">'+hs+'</div></div>'+scoreBlock(home,away)+'<div class="team">'+fH(away)+'<div class="team-name">'+as+'</div></div></div>'
   +'<div class="card-footer"><div class="time-venue">'
   +'<div class="match-time">⏱ '+time+' <span class="tz-label">'+tzL+'</span></div>'
   +(aTz==='Cairo'?'<div class="match-date-local">'+dL+s.cairoPh+'</div>':'')
@@ -569,6 +765,9 @@ function render(){
 updateStaticStrings();
 rebuildFilters();
 render();
+// Start live data
+fetchLiveData();
+refreshTimer=setInterval(fetchLiveData,60000);
 </script>
 </body>
 </html>
