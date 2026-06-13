@@ -785,6 +785,15 @@ async function toggleStats(idx){
     const data=await apiFetch('/matches/'+apiId);
     statsCache[key]=data;
     renderStats(idx,data,home,away,ld);
+    // Debug: append raw counts
+    const dbg=document.getElementById('sp'+idx);
+    if(dbg){
+      const g=(data.goals||[]).length,b=(data.bookings||[]).length,st=(data.statistics||[]).length;
+      const extra=document.createElement('div');
+      extra.style.cssText='font-size:9px;color:#444;padding:4px 6px;margin-top:6px;background:#0a0e18;border-radius:4px;word-break:break-all';
+      extra.textContent='[Debug] matchId='+apiId+' | goals='+g+' | bookings='+b+' | stats='+st+' | status='+data.status;
+      dbg.appendChild(extra);
+    }
   }catch(e){
     panel.innerHTML='<div class="stats-msg">⚠️ '+e.message+'</div>';
   }
