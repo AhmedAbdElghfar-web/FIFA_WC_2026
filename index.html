@@ -755,6 +755,99 @@ function togglePred(idx){
   setTimeout(()=>{const cf=document.getElementById('cf'+idx);if(cf)cf.style.width=conf+'%';},50);
 }
 
+// ── ESPN API (free, no auth, CORS-friendly) ───────────────────────────────────
+const ESPN='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
+const espnEvtCache={};
+const espnSumCache={};
+const EMAP={'South Korea':'Korea Republic','Bosnia & Herz.':'Bosnia & Herzegovina',"Ivory Coast":"Côte d'Ivoire",'Türkiye':'Turkey','Curaçao':'Curacao','DR Congo':'Congo DR','Cape Verde':'Cabo Verde','New Zealand':'New Zealand'};
+const en2=n=>EMAP[n]||n;
+
+function dispToYMD(d){
+  const mo={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+  const p=d.split(' ');return'2026'+mo[p[1]]+p[2].padStart(2,'0');
+}
+
+async function espnEvents(dt){
+  if(espnEvtCache[dt])return espnEvtCache[dt];
+  const r=await fetch(ESPN+'/scoreboard?dates='+dt);
+  if(!r.ok)throw new Error('ESPN scoreboard '+r.status);
+  const j=await r.json();
+  return(espnEvtCache[dt]=j.events||[]);
+}
+
+async function espnSum(id){
+  if(espnSumCache[id])return espnSumCache[id];
+  const r=await fetch(ESPN+'/summary?event='+id);
+  if(!r.ok)throw new Error('ESPN summary '+r.status);
+  const j=await r.json();
+  return(espnSumCache[id]=j);
+}
+
+function findEvt(events,home,away){
+  const hk=en2(home).toLowerCase();const ak=en2(away).toLowerCase();
+  const tok=s=>s.split(' ')[0];
+  return events.find(e=>{
+    const nn=(e.competitions?.[0]?.competitors||[]).map(c=>(c.team?.displayName||'').toLowerCase());
+    return nn.some(n=>n.includes(tok(hk))||hk.includes(tok(n)))
+        && nn.some(n=>n.includes(tok(ak))||ak.includes(tok(n)));
+  });
+}
+
+function parseESPN(sum,home,away,evt){
+  const comps=evt.competitions?.[0]?.competitors||[];
+  const hComp=comps.find(c=>{const n=(c.team?.displayName||'').toLowerCase();return n.includes(en2(home).toLowerCase().split(' ')[0])||en2(home).toLowerCase().includes(n.split(' ')[0]);})||comps[0];
+  const aComp=comps.find(c=>c!==hComp)||comps[1];
+  const hAbbr=(hComp?.team?.abbreviation||'X').toUpperCase();
+  const aAbbr=(aComp?.team?.abbreviation||'Y').toUpperCase();
+  // Goals
+  const goals=[];
+  (sum.scoringPlays||[]).forEach(sp=>{
+    if(!sp.scoringPlay)return;
+    const ab=(sp.team?.abbreviation||'').toUpperCase();
+    const isH=ab===hAbbr;const isA=ab===aAbbr;
+    if(!isH&&!isA)return;
+    const min=parseInt((sp.clock?.displayValue||'0:00').split(':')[0])||0;
+    const aths=Array.isArray(sp.athlete)?sp.athlete:[sp.athlete].filter(Boolean);
+    const scorer=aths[0]?.shortName||aths[0]?.displayName||sp.text||'?';
+    const txt=(sp.type?.text||'').toLowerCase();
+    const type=txt.includes('penalty')?'PENALTY':txt.includes('own')?'OWN_GOAL':'REGULAR';
+    goals.push({minute:min,injuryTime:null,type,team:{name:isH?home:away},scorer:{name:scorer},assist:null});
+  });
+  goals.sort((a,b)=>a.minute-b.minute);
+  // Stats
+  const statistics=[];
+  (sum.boxScore?.teams||[]).forEach(t=>{
+    const ab=(t.team?.abbreviation||'').toUpperCase();
+    const isH=ab===hAbbr;const tname=isH?home:away;
+    const s={};
+    (t.statistics||[]).forEach(st=>{
+      const v=st.displayValue;
+      if(st.name==='possessionPct')s.possession=v;
+      if(st.name==='shotsOnTarget')s.onTarget=parseInt(v)||0;
+      if(st.name==='shots')s.totalShots=parseInt(v)||0;
+      if(st.name==='foulsCommitted'||st.name==='fouls')s.fouls=parseInt(v)||0;
+      if(st.name==='cornerKicks'||st.name==='corners')s.corners=parseInt(v)||0;
+    });
+    if(s.totalShots&&s.onTarget)s.offTarget=Math.max(0,s.totalShots-s.onTarget);
+    statistics.push({team:{name:tname},statistics:s});
+  });
+  return{goals,bookings:[],statistics,_src:'espn'};
+}
+
+async function getMatchStats(home,away,dispDate,ld){
+  // 1) Try ESPN
+  try{
+    const dt=dispToYMD(dispDate);
+    const evts=await espnEvents(dt);
+    const evt=findEvt(evts,home,away);
+    if(evt){const s=await espnSum(evt.id);return parseESPN(s,home,away,evt);}
+  }catch(ignored){}
+  // 2) Fall back to football-data.org individual match
+  const apiId=ld?.apiId;
+  if(apiId)return await apiFetch('/matches/'+apiId);
+  throw new Error('No stats source available');
+}
+
 // ── MATCH STATS ───────────────────────────────────────────────────────────────
 const statsCache={};
 
@@ -763,37 +856,24 @@ async function toggleStats(idx){
   const btn=document.getElementById('sb'+idx);
   if(!panel||!btn)return;
   if(panel.style.display!=='none'){panel.style.display='none';btn.classList.remove('active-st');return;}
-  const[,,,group,stage,home,away]=M[idx];
+  const[,utc,dispDate,,stage,home,away]=M[idx];
   const key=home+'||'+away;
   const ld=liveData[key];
   const s=S();
   panel.style.display='block';btn.classList.add('active-st');
-  // Not started
   if(!ld||ld.status==='SCHEDULED'||ld.status==='TIMED'){
     panel.innerHTML='<div class="stats-msg">⏰ '+s.matchNS+'</div>';return;
   }
-  // No API ID — live data not fetched yet
-  const apiId=ld?.apiId;
-  if(!apiId){
-    panel.innerHTML='<div class="stats-msg">🔄 '+s.refreshFirst+'</div>';return;
-  }
-  // Use cache
   if(statsCache[key]){renderStats(idx,statsCache[key],home,away,ld);return;}
-  // Fetch individual match (only source for goals/bookings)
   panel.innerHTML='<div class="stats-msg">⏳ '+s.loadingStats+'</div>';
   try{
-    const data=await apiFetch('/matches/'+apiId);
+    const data=await getMatchStats(home,away,dispDate,ld);
     statsCache[key]=data;
     renderStats(idx,data,home,away,ld);
-    // Debug: append raw counts
-    const dbg=document.getElementById('sp'+idx);
-    if(dbg){
-      const g=(data.goals||[]).length,b=(data.bookings||[]).length,st=(data.statistics||[]).length;
-      const extra=document.createElement('div');
-      extra.style.cssText='font-size:9px;color:#444;padding:4px 6px;margin-top:6px;background:#0a0e18;border-radius:4px;word-break:break-all';
-      extra.textContent='[Debug] matchId='+apiId+' | goals='+g+' | bookings='+b+' | stats='+st+' | status='+data.status;
-      dbg.appendChild(extra);
-    }
+    // Show source badge
+    const src=data._src==='espn'?'ESPN API':'football-data.org';
+    const p2=document.getElementById('sp'+idx);
+    if(p2){const b=document.createElement('div');b.style.cssText='font-size:9px;color:#333;text-align:right;padding:2px 4px';b.textContent='📡 '+src;p2.appendChild(b);}
   }catch(e){
     panel.innerHTML='<div class="stats-msg">⚠️ '+e.message+'</div>';
   }
