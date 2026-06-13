@@ -840,12 +840,26 @@ async function getMatchStats(home,away,dispDate,ld){
     const dt=dispToYMD(dispDate);
     const evts=await espnEvents(dt);
     const evt=findEvt(evts,home,away);
-    if(evt){const s=await espnSum(evt.id);return parseESPN(s,home,away,evt);}
-  }catch(ignored){}
-  // 2) Fall back to football-data.org individual match
-  const apiId=ld?.apiId;
-  if(apiId)return await apiFetch('/matches/'+apiId);
-  throw new Error('No stats source available');
+    if(evt){
+      const s=await espnSum(evt.id);
+      const parsed=parseESPN(s,home,away,evt);
+      // Debug: attach raw info
+      parsed._dbg={
+        evtId:evt.id,
+        evtName:evt.name,
+        scoringPlaysCount:(s.scoringPlays||[]).length,
+        scoringPlaysSample:s.scoringPlays?JSON.stringify(s.scoringPlays[0]||{}).slice(0,200):'none',
+        boxScoreTeams:(s.boxScore?.teams||[]).length,
+        topKeys:Object.keys(s).join(','),
+        eventsOnDate:evts.length
+      };
+      return parsed;
+    }else{
+      return{goals:[],bookings:[],statistics:[],_src:'espn_nomatch',_dbg:{eventsOnDate:evts.length,evtNames:evts.map(e=>e.name).join(' | ')}};
+    }
+  }catch(e){
+    return{goals:[],bookings:[],statistics:[],_src:'espn_err',_dbg:{err:e.message}};
+  }
 }
 
 // ── MATCH STATS ───────────────────────────────────────────────────────────────
@@ -870,10 +884,19 @@ async function toggleStats(idx){
     const data=await getMatchStats(home,away,dispDate,ld);
     statsCache[key]=data;
     renderStats(idx,data,home,away,ld);
-    // Show source badge
-    const src=data._src==='espn'?'ESPN API':'football-data.org';
+    // Debug output
     const p2=document.getElementById('sp'+idx);
-    if(p2){const b=document.createElement('div');b.style.cssText='font-size:9px;color:#333;text-align:right;padding:2px 4px';b.textContent='📡 '+src;p2.appendChild(b);}
+    if(p2&&data._dbg){
+      const b=document.createElement('div');
+      b.style.cssText='font-size:9px;color:#4a6080;margin-top:8px;padding:5px;background:#0a0e18;border-radius:4px;word-break:break-all;line-height:1.6';
+      b.innerHTML='<b style="color:#2dd4bf">ESPN Debug:</b><br>'
+        +Object.entries(data._dbg).map(([k,v])=>'<b>'+k+':</b> '+v).join('<br>');
+      p2.appendChild(b);
+    }
+    // Source badge
+    const src=data._src==='espn'?'ESPN API ✅':(data._src||'football-data.org');
+    const p3=document.getElementById('sp'+idx);
+    if(p3){const b2=document.createElement('div');b2.style.cssText='font-size:9px;color:#333;text-align:right;padding:2px 4px';b2.textContent='📡 '+src;p3.appendChild(b2);}
   }catch(e){
     panel.innerHTML='<div class="stats-msg">⚠️ '+e.message+'</div>';
   }
