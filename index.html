@@ -161,6 +161,42 @@ body:not(.ar) .pred-analysis{border-right:none;border-left:3px solid rgba(124,58
 body.ar .conf-pct{text-align:left}
 .gcal-add-all{font-size:10px;padding:5px 10px;background:linear-gradient(135deg,#1a73e8,#0d47a1);border:none;border-radius:7px;color:#fff;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
 .no-results{text-align:center;padding:60px 20px;color:var(--sub)}
+/* ── stats panel ── */
+.stats-btn{background:linear-gradient(135deg,#0f766e,#0d9488);border:none;border-radius:7px;padding:6px 11px;font-size:11px;font-weight:600;color:#fff;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;transition:all .2s;font-family:inherit;min-width:72px;justify-content:center}
+.stats-btn:hover{filter:brightness(1.2);box-shadow:0 3px 12px rgba(13,148,136,.4)}
+.stats-btn.active-st{background:linear-gradient(135deg,#0d9488,#0f766e)}
+.stats-panel{border-top:1px solid var(--border);padding:12px 14px;background:linear-gradient(135deg,rgba(13,148,136,.05),rgba(6,11,20,.02));animation:fadeIn .3s ease}
+.stats-hdr{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.stats-hdr-txt{font-size:11px;font-weight:700;color:#2dd4bf;text-transform:uppercase;letter-spacing:1.5px}
+body.ar .stats-hdr-txt{text-transform:none;letter-spacing:0;font-family:'Cairo',sans-serif}
+.stats-teams-hdr{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--text);margin-bottom:10px;padding:0 2px}
+.stats-sec-lbl{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:600}
+body.ar .stats-sec-lbl{text-transform:none;letter-spacing:0;font-family:'Cairo',sans-serif;font-size:11px}
+.stats-sec{margin-bottom:12px}
+.goals-grid{display:flex;gap:6px}
+.goals-col{flex:1;display:flex;flex-direction:column;gap:3px}
+.goal-evt{display:flex;align-items:center;gap:4px;font-size:11px;padding:3px 5px;border-radius:5px;background:rgba(0,232,122,.06)}
+.goal-evt.away{justify-content:flex-end;flex-direction:row-reverse;background:rgba(255,59,92,.06)}
+.goal-min{color:var(--green);font-weight:700;font-size:10px;white-space:nowrap;flex-shrink:0}
+.goal-evt.away .goal-min{color:var(--red)}
+.goal-name{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.goal-assist{color:var(--sub);font-size:10px;white-space:nowrap}
+.goal-sep{width:1px;background:var(--border);flex-shrink:0;align-self:stretch;margin:0 2px}
+.no-goals{text-align:center;font-size:11px;color:var(--sub);padding:4px 0;font-style:italic}
+.booking-evt{display:flex;align-items:center;gap:6px;font-size:11px;margin-bottom:4px;padding:3px 5px;border-radius:5px;background:var(--bg3)}
+.bk-icon{font-size:13px;line-height:1;flex-shrink:0}
+.bk-min{color:var(--sub);font-size:10px;min-width:28px;flex-shrink:0}
+.bk-name{color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bk-side{font-size:10px;color:var(--sub);flex-shrink:0}
+.stat-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.stat-vl{font-size:11px;font-weight:700;color:var(--text);min-width:34px}
+.stat-vl.h{text-align:left;color:var(--green)}
+.stat-vl.a{text-align:right;color:var(--red)}
+.stat-nm{flex:1;text-align:center;font-size:10px;color:var(--sub)}
+.sbar{display:flex;height:4px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.sbar-h{height:100%;background:var(--green);border-radius:3px 0 0 3px;transition:width .7s ease}
+.sbar-a{height:100%;background:var(--red);border-radius:0 3px 3px 0;transition:width .7s ease}
+.stats-msg{text-align:center;font-size:11px;color:var(--sub);padding:10px 0;font-style:italic}
 .toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--green);color:#000;border-radius:10px;padding:12px 20px;font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;transform:translateY(100px);opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 8px 28px rgba(0,232,122,.3);font-family:inherit}
 body.ar .toast{right:auto;left:24px}
 .toast.show{transform:translateY(0);opacity:1}
@@ -253,6 +289,13 @@ const STR={
     toast:'📅 Added to Google Calendar!',
     noKoPred:'Knockout predictions available after group stage.',
     starsSep:'|',
+    statsBtn:'📈 Stats',
+    statsTitle:'Match Statistics',
+    goalsLbl:'Goals',cardsLbl:'Cards',statsLbl:'Statistics',
+    noGoals:'No goals yet',noCards:'No cards',noStats:'Detailed stats not available',
+    matchNS:'Match hasn\'t started yet',refreshFirst:'Reload live data first',
+    loadingStats:'Loading stats…',
+    possession:'Possession',onTarget:'Shots on Target',offTarget:'Shots Off',corners:'Corners',fouls:'Fouls',
   },
   ar:{
     sub:'⚽ ١١ يونيو – ١٩ يوليو ٢٠٢٦ · أمريكا الشمالية · توقعات AI',
@@ -272,6 +315,13 @@ const STR={
     toast:'📅 تمت الإضافة إلى Google Calendar!',
     noKoPred:'توقعات النوكاوت متاحة بعد انتهاء المجموعات.',
     starsSep:'|',
+    statsBtn:'📈 إحصائيات',
+    statsTitle:'إحصائيات المباراة',
+    goalsLbl:'الأهداف',cardsLbl:'البطاقات',statsLbl:'إحصائيات',
+    noGoals:'لا توجد أهداف بعد',noCards:'لا توجد بطاقات',noStats:'التفاصيل غير متاحة',
+    matchNS:'المباراة لم تبدأ بعد',refreshFirst:'حدّث البيانات أولاً',
+    loadingStats:'جاري تحميل الإحصائيات…',
+    possession:'الحيازة',onTarget:'تسديدات للمرمى',offTarget:'تسديدات خارج',corners:'ركلات الزاوية',fouls:'المخالفات',
   }
 };
 
@@ -703,6 +753,133 @@ function togglePred(idx){
   setTimeout(()=>{const cf=document.getElementById('cf'+idx);if(cf)cf.style.width=conf+'%';},50);
 }
 
+// ── MATCH STATS ───────────────────────────────────────────────────────────────
+const statsCache={};
+
+async function toggleStats(idx){
+  const panel=document.getElementById('sp'+idx);
+  const btn=document.getElementById('sb'+idx);
+  if(!panel||!btn)return;
+  if(panel.style.display!=='none'){panel.style.display='none';btn.classList.remove('active-st');return;}
+  const[,,,group,stage,home,away]=M[idx];
+  const key=home+'||'+away;
+  const ld=liveData[key];
+  const s=S();
+  // Not started yet
+  if(!ld||ld.status==='SCHEDULED'||ld.status==='TIMED'){
+    panel.innerHTML='<div class="stats-msg">⏰ '+s.matchNS+'</div>';
+    panel.style.display='block';btn.classList.add('active-st');return;
+  }
+  // Cached
+  if(statsCache[key]){renderStats(idx,statsCache[key],home,away);panel.style.display='block';btn.classList.add('active-st');return;}
+  // Need API ID
+  const apiId=ld?.apiId;
+  if(!apiId){
+    panel.innerHTML='<div class="stats-msg">🔄 '+s.refreshFirst+'</div>';
+    panel.style.display='block';btn.classList.add('active-st');return;
+  }
+  panel.innerHTML='<div class="stats-msg">⏳ '+s.loadingStats+'</div>';
+  panel.style.display='block';btn.classList.add('active-st');
+  try{
+    const data=await apiFetch('/matches/'+apiId);
+    statsCache[key]=data;
+    renderStats(idx,data,home,away);
+  }catch(e){
+    panel.innerHTML='<div class="stats-msg">⚠️ '+e.message.slice(0,60)+'</div>';
+  }
+}
+
+function renderStats(idx,data,home,away){
+  const panel=document.getElementById('sp'+idx);
+  if(!panel)return;
+  const s=S();
+  const isAr=aLang==='ar';
+  const goals=data.goals||[];
+  const bookings=data.bookings||[];
+  const apiStats=data.statistics||[];
+  const hGoals=goals.filter(g=>tName(g.team?.name||'')===home);
+  const aGoals=goals.filter(g=>tName(g.team?.name||'')===away);
+  const homeSt=apiStats.find(x=>tName(x.team?.name||'')===home)?.statistics||{};
+  const awaySt=apiStats.find(x=>tName(x.team?.name||'')===away)?.statistics||{};
+  const sn=n=>n?n.split(' ').slice(-1)[0]:n; // last name only
+  const hs=home.length>13?home.slice(0,12)+'…':home;
+  const as=away.length>13?away.slice(0,12)+'…':away;
+  let html='<div class="stats-hdr"><span>📊</span><span class="stats-hdr-txt">'+s.statsTitle+'</span></div>';
+  html+='<div class="stats-teams-hdr"><span>'+hs+'</span><span>'+as+'</span></div>';
+  // ── GOALS ──
+  html+='<div class="stats-sec"><div class="stats-sec-lbl">⚽ '+s.goalsLbl+'</div>';
+  if(goals.length===0){
+    html+='<div class="no-goals">'+s.noGoals+'</div>';
+  }else{
+    html+='<div class="goals-grid"><div class="goals-col">';
+    hGoals.forEach(g=>{
+      const sfx=g.type==='PENALTY'?' ⚽(P)':g.type==='OWN_GOAL'?' (OG)':'';
+      const ast=g.assist?.name?'<span class="goal-assist">↗'+sn(g.assist.name)+'</span>':'';
+      const min=g.minute+(g.injuryTime?'+'+g.injuryTime:'')+"'";
+      html+='<div class="goal-evt home"><span class="goal-min">⚽ '+min+'</span><span class="goal-name">'+sn(g.scorer?.name||'?')+sfx+'</span>'+ast+'</div>';
+    });
+    html+='</div><div class="goal-sep"></div><div class="goals-col">';
+    aGoals.forEach(g=>{
+      const sfx=g.type==='PENALTY'?' (P)':g.type==='OWN_GOAL'?' (OG)':'';
+      const ast=g.assist?.name?'<span class="goal-assist">↗'+sn(g.assist.name)+'</span>':'';
+      const min=g.minute+(g.injuryTime?'+'+g.injuryTime:'')+"'";
+      html+='<div class="goal-evt away">'+ast+'<span class="goal-name">'+sn(g.scorer?.name||'?')+sfx+'</span><span class="goal-min">'+min+' ⚽</span></div>';
+    });
+    html+='</div></div>';
+  }
+  html+='</div>';
+  // ── CARDS ──
+  if(bookings.length>0){
+    html+='<div class="stats-sec"><div class="stats-sec-lbl">🃏 '+s.cardsLbl+'</div>';
+    bookings.forEach(b=>{
+      const icon=b.card==='RED_CARD'?'🟥':b.card==='YELLOW_RED_CARD'?'🟧':'🟨';
+      const side=tName(b.team?.name||'')===home?hs:as;
+      const min=b.minute+(b.injuryTime?'+'+b.injuryTime:'')+"'";
+      html+='<div class="booking-evt"><span class="bk-icon">'+icon+'</span><span class="bk-min">'+min+'</span><span class="bk-name">'+sn(b.player?.name||'?')+'</span><span class="bk-side">'+side+'</span></div>';
+    });
+    html+='</div>';
+  }
+  // ── STATS BARS ──
+  const sbars=[
+    {k:'possession',l:s.possession,fmt:v=>v+'%'},
+    {k:'onTarget',l:s.onTarget,fmt:v=>v},
+    {k:'offTarget',l:s.offTarget,fmt:v=>v},
+    {k:'corners',l:s.corners,fmt:v=>v},
+    {k:'fouls',l:s.fouls,fmt:v=>v},
+  ];
+  const hasStats=Object.keys(homeSt).length||Object.keys(awaySt).length;
+  if(hasStats){
+    html+='<div class="stats-sec"><div class="stats-sec-lbl">📈 '+s.statsLbl+'</div>';
+    sbars.forEach(r=>{
+      const hv=homeSt[r.k],av=awaySt[r.k];
+      if(hv==null&&av==null)return;
+      const hn=parseFloat(hv)||0,an=parseFloat(av)||0;
+      const tot=hn+an||1;
+      const hp=Math.round(hn/tot*100);
+      html+='<div class="stat-row"><span class="stat-vl h">'+r.fmt(hv??0)+'</span><span class="stat-nm">'+r.l+'</span><span class="stat-vl a">'+r.fmt(av??0)+'</span></div>'
+        +'<div class="sbar" id="sb_'+idx+'_'+r.k+'"><div class="sbar-h" style="width:0%"></div><div class="sbar-a" style="width:0%"></div></div>';
+    });
+    html+='</div>';
+    // Animate bars after DOM update
+    setTimeout(()=>{
+      sbars.forEach(r=>{
+        const el=document.getElementById('sb_'+idx+'_'+r.k);
+        if(!el)return;
+        const hv=homeSt[r.k],av=awaySt[r.k];
+        const hn=parseFloat(hv)||0,an=parseFloat(av)||0;
+        const tot=hn+an||1;
+        const hp=Math.round(hn/tot*100);
+        const bh=el.querySelector('.sbar-h'),ba=el.querySelector('.sbar-a');
+        if(bh)bh.style.width=hp+'%';
+        if(ba)ba.style.width=(100-hp)+'%';
+      });
+    },50);
+  }else{
+    html+='<div class="stats-msg">'+s.noStats+'</div>';
+  }
+  panel.innerHTML=html;
+}
+
 // ── FILTERS ───────────────────────────────────────────────────────────────────
 function setTz(tz){aTz=tz;document.getElementById('tz-et').classList.toggle('active',tz==='ET');document.getElementById('tz-cairo').classList.toggle('active',tz==='Cairo');render();}
 function setStage(s){aStg=s;rebuildFilters();if(s!=='Group Stage'&&s!=='All'){aGrp='All';}render();}
@@ -735,9 +912,11 @@ function bCard(m,idx){
   +'<div class="match-venue">'+vfHtml+'📍 '+venue+', '+city+'</div>'
   +'</div>'
   +'<div class="btn-row">'
+  +'<button class="stats-btn" id="sb'+idx+'" onclick="toggleStats('+idx+')">'+s.statsBtn+'</button>'
   +'<button class="pred-btn" id="pb'+idx+'" onclick="togglePred('+idx+')">'+s.predBtn+'</button>'
   +'<button class="gcal-btn" onclick="gcal('+idx+')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>'+s.calBtn+'</button>'
   +'</div></div>'
+  +'<div class="stats-panel" id="sp'+idx+'" style="display:none"></div>'
   +'<div class="pred-panel" id="pp'+idx+'" style="display:none"></div>'
   +'</div>';
 }
