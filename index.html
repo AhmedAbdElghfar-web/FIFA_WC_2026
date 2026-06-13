@@ -387,7 +387,11 @@ async function fetchLiveData(){
         as:ft?.away??ht?.away??null,
         hths:ht?.home??null,htas:ht?.away??null,
         min:m.minute||null,inj:m.injuryTime||null,
-        apiId:m.id
+        apiId:m.id,
+        goals:m.goals||[],
+        bookings:m.bookings||[],
+        homeTeamName:m.homeTeam?.name||'',
+        awayTeamName:m.awayTeam?.name||''
       };
     });
     const now=new Date();
@@ -765,31 +769,39 @@ async function toggleStats(idx){
   const key=home+'||'+away;
   const ld=liveData[key];
   const s=S();
-  // Not started yet
+  // Not started
   if(!ld||ld.status==='SCHEDULED'||ld.status==='TIMED'){
     panel.innerHTML='<div class="stats-msg">⏰ '+s.matchNS+'</div>';
     panel.style.display='block';btn.classList.add('active-st');return;
   }
-  // Cached
-  if(statsCache[key]){renderStats(idx,statsCache[key],home,away);panel.style.display='block';btn.classList.add('active-st');return;}
-  // Need API ID
-  const apiId=ld?.apiId;
-  if(!apiId){
-    panel.innerHTML='<div class="stats-msg">🔄 '+s.refreshFirst+'</div>';
-    panel.style.display='block';btn.classList.add('active-st');return;
-  }
-  panel.innerHTML='<div class="stats-msg">⏳ '+s.loadingStats+'</div>';
   panel.style.display='block';btn.classList.add('active-st');
+  // Build data object from liveData (goals + bookings already stored)
+  // Try to get detailed stats (possession etc) if not cached
+  if(statsCache[key]){
+    renderStats(idx,statsCache[key],home,away,ld);return;
+  }
+  // Show goals/bookings immediately from liveData
+  renderStats(idx,{goals:ld.goals||[],bookings:ld.bookings||[],statistics:[]},home,away,ld);
+  // Then try to fetch detailed stats in background
+  const apiId=ld?.apiId;
+  if(!apiId)return;
   try{
     const data=await apiFetch('/matches/'+apiId);
-    statsCache[key]=data;
-    renderStats(idx,data,home,away);
+    // Merge: prefer API goals/bookings if richer, keep liveData as fallback
+    const merged={
+      goals: (data.goals&&data.goals.length>0)?data.goals:(ld.goals||[]),
+      bookings: (data.bookings&&data.bookings.length>0)?data.bookings:(ld.bookings||[]),
+      statistics: data.statistics||[]
+    };
+    statsCache[key]=merged;
+    renderStats(idx,merged,home,away,ld);
   }catch(e){
-    panel.innerHTML='<div class="stats-msg">⚠️ '+e.message.slice(0,60)+'</div>';
+    // Already showing goals from liveData — just note stats unavailable
+    // No need to show error, goals are already displayed
   }
 }
 
-function renderStats(idx,data,home,away){
+function renderStats(idx,data,home,away,ld){
   const panel=document.getElementById('sp'+idx);
   if(!panel)return;
   const s=S();
@@ -797,10 +809,13 @@ function renderStats(idx,data,home,away){
   const goals=data.goals||[];
   const bookings=data.bookings||[];
   const apiStats=data.statistics||[];
-  const hGoals=goals.filter(g=>tName(g.team?.name||'')===home);
-  const aGoals=goals.filter(g=>tName(g.team?.name||'')===away);
-  const homeSt=apiStats.find(x=>tName(x.team?.name||'')===home)?.statistics||{};
-  const awaySt=apiStats.find(x=>tName(x.team?.name||'')===away)?.statistics||{};
+  // Robust team matching — match by our name OR original API name
+  const isHome=n=>{const tn=tName(n||'');return tn===home||(ld&&n===ld.homeTeamName);};
+  const isAway=n=>{const tn=tName(n||'');return tn===away||(ld&&n===ld.awayTeamName);};
+  const hGoals=goals.filter(g=>isHome(g.team?.name));
+  const aGoals=goals.filter(g=>isAway(g.team?.name));
+  const homeSt=apiStats.find(x=>isHome(x.team?.name))?.statistics||{};
+  const awaySt=apiStats.find(x=>isAway(x.team?.name))?.statistics||{};
   const sn=n=>n?n.split(' ').slice(-1)[0]:n; // last name only
   const hs=home.length>13?home.slice(0,12)+'…':home;
   const as=away.length>13?away.slice(0,12)+'…':away;
