@@ -388,8 +388,6 @@ async function fetchLiveData(){
         hths:ht?.home??null,htas:ht?.away??null,
         min:m.minute||null,inj:m.injuryTime||null,
         apiId:m.id,
-        goals:m.goals||[],
-        bookings:m.bookings||[],
         homeTeamName:m.homeTeam?.name||'',
         awayTeamName:m.awayTeam?.name||''
       };
@@ -769,35 +767,26 @@ async function toggleStats(idx){
   const key=home+'||'+away;
   const ld=liveData[key];
   const s=S();
+  panel.style.display='block';btn.classList.add('active-st');
   // Not started
   if(!ld||ld.status==='SCHEDULED'||ld.status==='TIMED'){
-    panel.innerHTML='<div class="stats-msg">⏰ '+s.matchNS+'</div>';
-    panel.style.display='block';btn.classList.add('active-st');return;
+    panel.innerHTML='<div class="stats-msg">⏰ '+s.matchNS+'</div>';return;
   }
-  panel.style.display='block';btn.classList.add('active-st');
-  // Build data object from liveData (goals + bookings already stored)
-  // Try to get detailed stats (possession etc) if not cached
-  if(statsCache[key]){
-    renderStats(idx,statsCache[key],home,away,ld);return;
-  }
-  // Show goals/bookings immediately from liveData
-  renderStats(idx,{goals:ld.goals||[],bookings:ld.bookings||[],statistics:[]},home,away,ld);
-  // Then try to fetch detailed stats in background
+  // No API ID — live data not fetched yet
   const apiId=ld?.apiId;
-  if(!apiId)return;
+  if(!apiId){
+    panel.innerHTML='<div class="stats-msg">🔄 '+s.refreshFirst+'</div>';return;
+  }
+  // Use cache
+  if(statsCache[key]){renderStats(idx,statsCache[key],home,away,ld);return;}
+  // Fetch individual match (only source for goals/bookings)
+  panel.innerHTML='<div class="stats-msg">⏳ '+s.loadingStats+'</div>';
   try{
     const data=await apiFetch('/matches/'+apiId);
-    // Merge: prefer API goals/bookings if richer, keep liveData as fallback
-    const merged={
-      goals: (data.goals&&data.goals.length>0)?data.goals:(ld.goals||[]),
-      bookings: (data.bookings&&data.bookings.length>0)?data.bookings:(ld.bookings||[]),
-      statistics: data.statistics||[]
-    };
-    statsCache[key]=merged;
-    renderStats(idx,merged,home,away,ld);
+    statsCache[key]=data;
+    renderStats(idx,data,home,away,ld);
   }catch(e){
-    // Already showing goals from liveData — just note stats unavailable
-    // No need to show error, goals are already displayed
+    panel.innerHTML='<div class="stats-msg">⚠️ '+e.message+'</div>';
   }
 }
 
