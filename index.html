@@ -284,36 +284,46 @@ const fu=n=>{const c=FLAGS[n];return c?'https://flagcdn.com/w80/'+c+'.png':null}
 // ── LIVE DATA (football-data.org) ─────────────────────────────────────────────
 const API_KEY='20e69677471940a79568df3b175b8746';
 const API='https://api.football-data.org/v4';
-const liveData={};       // key: 'Home||Away' → {status,hs,as,min}
-const standingsData={};  // key: 'GROUP_A' → [{pos,team,p,w,d,l,gf,ga,gd,pts}]
+const PROXY='https://corsproxy.io/?';
+const liveData={};
+const standingsData={};
 let standOpen=false;
 let refreshTimer=null;
 
-// API name → our name
 const TMAP={
   'Korea Republic':'South Korea','Bosnia and Herzegovina':'Bosnia & Herz.',
   'Bosnia & Herzegovina':'Bosnia & Herz.','Turkey':'Türkiye',
-  "Côte d'Ivoire":'Ivory Coast','Cote d\'Ivoire':'Ivory Coast',
+  "Côte d'Ivoire":'Ivory Coast',"Cote d'Ivoire":'Ivory Coast',
   'Congo DR':'DR Congo','Congo, DR':'DR Congo',
   'Democratic Republic of Congo':'DR Congo',
-  'Republic of Congo':'DR Congo',
-  'Curacao':'Curaçao','Curaçao':'Curaçao',
-  'Cape Verde Islands':'Cape Verde',
-  'Iran (Islamic Republic of)':'Iran',
-  'Korea DPR':'North Korea',
-  'USA':'USA','United States':'USA',
-  'England':'England','Scotland':'Scotland',
+  'Curacao':'Curaçao','United States':'USA',
+  'Cape Verde Islands':'Cape Verde','Iran (Islamic Republic of)':'Iran',
 };
 const tName=n=>TMAP[n]||n;
+
+// Smart fetch: tries direct first, falls back to CORS proxy
+async function apiFetch(endpoint){
+  const url=API+endpoint;
+  const hdrs={'X-Auth-Token':API_KEY,'Content-Type':'application/json'};
+  // 1) Try direct
+  try{
+    const r=await fetch(url,{headers:hdrs,mode:'cors'});
+    if(r.ok) return await r.json();
+    const msg='HTTP '+r.status+(r.status===403?' (check API plan)':r.status===404?' (competition not found)':'');
+    throw new Error(msg);
+  }catch(e){
+    // If network/CORS error (not HTTP), retry via proxy
+    if(e.message.startsWith('HTTP')) throw e;
+    const r2=await fetch(PROXY+encodeURIComponent(url),{headers:hdrs});
+    if(!r2.ok) throw new Error('HTTP '+r2.status+' (via proxy)');
+    return await r2.json();
+  }
+}
 
 async function fetchLiveData(){
   setLivePill('loading','⏳ Updating…');
   try{
-    const res=await fetch(API+'/competitions/WC/matches',{
-      headers:{'X-Auth-Token':API_KEY,'X-Unfold-Goals':'true'}
-    });
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const data=await res.json();
+    const data=await apiFetch('/competitions/WC/matches');
     Object.keys(liveData).forEach(k=>delete liveData[k]);
     (data.matches||[]).forEach(m=>{
       const h=tName(m.homeTeam?.name||'');
@@ -321,44 +331,37 @@ async function fetchLiveData(){
       const key=h+'||'+a;
       const ft=m.score?.fullTime;
       const ht=m.score?.halfTime;
-      const reg=m.score?.regularTime;
       liveData[key]={
         status:m.status,
-        hs: ft?.home??reg?.home??ht?.home??null,
-        as: ft?.away??reg?.away??ht?.away??null,
-        hths:ht?.home??null, htas:ht?.away??null,
-        min:m.minute||null,
-        inj:m.injuryTime||null,
+        hs:ft?.home??ht?.home??null,
+        as:ft?.away??ht?.away??null,
+        hths:ht?.home??null,htas:ht?.away??null,
+        min:m.minute||null,inj:m.injuryTime||null,
         apiId:m.id
       };
     });
     const now=new Date();
     const t=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'Africa/Cairo'});
-    document.getElementById('lastUpdated').textContent='Last updated: '+t+' Cairo';
-    const liveCount=Object.values(liveData).filter(d=>d.status==='IN_PLAY'||d.status==='PAUSED'||d.status==='HALF_TIME').length;
-    if(liveCount>0){setLivePill('ok','🔴 '+liveCount+' LIVE');}
-    else{setLivePill('ok','✅ Live data connected');}
+    document.getElementById('lastUpdated').textContent='Updated: '+t+' Cairo';
+    const liveCount=Object.values(liveData).filter(d=>['IN_PLAY','PAUSED','HALF_TIME'].includes(d.status)).length;
+    setLivePill('ok',liveCount>0?'🔴 '+liveCount+' LIVE':'✅ Live data connected');
     render();
   }catch(e){
-    setLivePill('err','⚠️ '+e.message.slice(0,40));
+    setLivePill('err','⚠️ '+e.message.slice(0,50));
     document.getElementById('lastUpdated').textContent='Retrying in 60s…';
   }
 }
 
 async function fetchStandings(){
   try{
-    const res=await fetch(API+'/competitions/WC/standings',{
-      headers:{'X-Auth-Token':API_KEY}
-    });
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const data=await res.json();
+    const data=await apiFetch('/competitions/WC/standings');
     Object.keys(standingsData).forEach(k=>delete standingsData[k]);
     (data.standings||[]).forEach(sg=>{
       if(sg.type==='TOTAL') standingsData[sg.group]=sg.table;
     });
     renderStandings();
   }catch(e){
-    document.getElementById('standGrid').innerHTML='<div class="no-stand">⚠️ Standings unavailable: '+e.message.slice(0,50)+'</div>';
+    document.getElementById('standGrid').innerHTML='<div class="no-stand">⚠️ '+e.message.slice(0,80)+'</div>';
   }
 }
 
