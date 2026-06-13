@@ -795,35 +795,54 @@ function findEvt(events,home,away){
 
 function parseESPN(sum,home,away,evt){
   const comps=evt.competitions?.[0]?.competitors||[];
-  // Use homeAway field — more reliable than name matching
   const hComp=comps.find(c=>c.homeAway==='home')||comps[0];
   const aComp=comps.find(c=>c.homeAway==='away')||comps[1];
   const hAbbr=(hComp?.team?.abbreviation||'X').toUpperCase();
   const aAbbr=(aComp?.team?.abbreviation||'Y').toUpperCase();
+  const hName=(hComp?.team?.displayName||en2(home)).toLowerCase();
+  const aName=(aComp?.team?.displayName||en2(away)).toLowerCase();
 
-  // Goals: ESPN uses keyEvents (NOT scoringPlays)
+  // Goals: keyEvents uses type.type/type.text, NOT scoringPlay boolean
   const allEvts=sum.keyEvents||sum.scoringPlays||[];
   const goals=[];
   allEvts.forEach(sp=>{
-    if(!sp.scoringPlay)return;
+    const typeStr=(sp.type?.type||sp.type?.text||'').toLowerCase();
+    if(!typeStr.includes('goal'))return; // skip non-goal events
+
+    // Determine team by abbreviation or parse from text
+    let teamName=null;
     const ab=(sp.team?.abbreviation||'').toUpperCase();
-    const isH=ab===hAbbr;const isA=ab===aAbbr;
-    if(!isH&&!isA)return;
+    if(ab===hAbbr)teamName=home;
+    else if(ab===aAbbr)teamName=away;
+    else{
+      // Extract team from text "(TeamName)" e.g. "Quiñones (Mexico)"
+      const tm=(sp.text||'').match(/\(([^)]+)\)/);
+      if(tm){
+        const tn=tm[1].toLowerCase();
+        const hk=hName.split(' ')[0];const ak=aName.split(' ')[0];
+        if(tn.includes(hk)||hk.includes(tn.split(' ')[0]))teamName=home;
+        else if(tn.includes(ak)||ak.includes(tn.split(' ')[0]))teamName=away;
+      }
+    }
+    if(!teamName)return;
+
+    // Scorer: parse "...N. Scorer Name (Team)..." from text
+    let scorer=sp.shortText||'?';
+    const nm=(sp.text||'').match(/\d+\.\s+([^(]+?)\s*\(/);
+    if(nm&&nm[1].trim().length>1)scorer=nm[1].trim();
+
     const min=parseInt((sp.clock?.displayValue||'0:00').split(':')[0])||0;
-    const aths=Array.isArray(sp.athlete)?sp.athlete:[sp.athlete].filter(Boolean);
-    const scorer=aths[0]?.shortName||aths[0]?.displayName||sp.text||'?';
-    const txt=(sp.type?.text||'').toLowerCase();
-    const type=txt.includes('penalty')?'PENALTY':txt.includes('own')?'OWN_GOAL':'REGULAR';
-    goals.push({minute:min,injuryTime:null,type,team:{name:isH?home:away},scorer:{name:scorer},assist:null});
+    const type=typeStr.includes('penalty')?'PENALTY':typeStr.includes('own')?'OWN_GOAL':'REGULAR';
+    goals.push({minute:min,injuryTime:null,type,team:{name:teamName},scorer:{name:scorer},assist:null});
   });
   goals.sort((a,b)=>a.minute-b.minute);
 
-  // Stats: ESPN uses boxscore (lowercase 's')
+  // Stats: boxscore (lowercase), fallback by index if abbr doesn't match
   const bsTeams=sum.boxscore?.teams||sum.boxScore?.teams||[];
   const statistics=[];
-  bsTeams.forEach(t=>{
+  bsTeams.forEach((t,i)=>{
     const ab=(t.team?.abbreviation||'').toUpperCase();
-    const isH=ab===hAbbr;
+    const isH=ab?ab===hAbbr:(i===0);
     const s={};
     (t.statistics||[]).forEach(st=>{
       const v=st.displayValue;
@@ -833,7 +852,7 @@ function parseESPN(sum,home,away,evt){
       if(st.name==='foulsCommitted'||st.name==='fouls')s.fouls=parseInt(v)||0;
       if(st.name==='cornerKicks'||st.name==='corners')s.corners=parseInt(v)||0;
     });
-    if(s.totalShots&&s.onTarget!=null)s.offTarget=Math.max(0,(s.totalShots||0)-(s.onTarget||0));
+    if(s.totalShots!=null&&s.onTarget!=null)s.offTarget=Math.max(0,(s.totalShots||0)-(s.onTarget||0));
     statistics.push({team:{name:isH?home:away},statistics:s});
   });
   return{goals,bookings:[],statistics,_src:'espn'};
@@ -889,19 +908,9 @@ async function toggleStats(idx){
     const data=await getMatchStats(home,away,dispDate,ld);
     statsCache[key]=data;
     renderStats(idx,data,home,away,ld);
-    // Debug output
+    // Small source badge
     const p2=document.getElementById('sp'+idx);
-    if(p2&&data._dbg){
-      const b=document.createElement('div');
-      b.style.cssText='font-size:9px;color:#4a6080;margin-top:8px;padding:5px;background:#0a0e18;border-radius:4px;word-break:break-all;line-height:1.6';
-      b.innerHTML='<b style="color:#2dd4bf">ESPN Debug:</b><br>'
-        +Object.entries(data._dbg).map(([k,v])=>'<b>'+k+':</b> '+v).join('<br>');
-      p2.appendChild(b);
-    }
-    // Source badge
-    const src=data._src==='espn'?'ESPN API ✅':(data._src||'football-data.org');
-    const p3=document.getElementById('sp'+idx);
-    if(p3){const b2=document.createElement('div');b2.style.cssText='font-size:9px;color:#333;text-align:right;padding:2px 4px';b2.textContent='📡 '+src;p3.appendChild(b2);}
+    if(p2){const b=document.createElement('div');b.style.cssText='font-size:9px;color:#2a3a4a;text-align:right;padding:2px 6px';b.textContent='📡 '+(data._src==='espn'?'ESPN':'football-data.org');p2.appendChild(b);}
   }catch(e){
     panel.innerHTML='<div class="stats-msg">⚠️ '+e.message+'</div>';
   }
