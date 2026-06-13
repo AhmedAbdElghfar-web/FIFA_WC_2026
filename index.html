@@ -795,13 +795,16 @@ function findEvt(events,home,away){
 
 function parseESPN(sum,home,away,evt){
   const comps=evt.competitions?.[0]?.competitors||[];
-  const hComp=comps.find(c=>{const n=(c.team?.displayName||'').toLowerCase();return n.includes(en2(home).toLowerCase().split(' ')[0])||en2(home).toLowerCase().includes(n.split(' ')[0]);})||comps[0];
-  const aComp=comps.find(c=>c!==hComp)||comps[1];
+  // Use homeAway field — more reliable than name matching
+  const hComp=comps.find(c=>c.homeAway==='home')||comps[0];
+  const aComp=comps.find(c=>c.homeAway==='away')||comps[1];
   const hAbbr=(hComp?.team?.abbreviation||'X').toUpperCase();
   const aAbbr=(aComp?.team?.abbreviation||'Y').toUpperCase();
-  // Goals
+
+  // Goals: ESPN uses keyEvents (NOT scoringPlays)
+  const allEvts=sum.keyEvents||sum.scoringPlays||[];
   const goals=[];
-  (sum.scoringPlays||[]).forEach(sp=>{
+  allEvts.forEach(sp=>{
     if(!sp.scoringPlay)return;
     const ab=(sp.team?.abbreviation||'').toUpperCase();
     const isH=ab===hAbbr;const isA=ab===aAbbr;
@@ -814,11 +817,13 @@ function parseESPN(sum,home,away,evt){
     goals.push({minute:min,injuryTime:null,type,team:{name:isH?home:away},scorer:{name:scorer},assist:null});
   });
   goals.sort((a,b)=>a.minute-b.minute);
-  // Stats
+
+  // Stats: ESPN uses boxscore (lowercase 's')
+  const bsTeams=sum.boxscore?.teams||sum.boxScore?.teams||[];
   const statistics=[];
-  (sum.boxScore?.teams||[]).forEach(t=>{
+  bsTeams.forEach(t=>{
     const ab=(t.team?.abbreviation||'').toUpperCase();
-    const isH=ab===hAbbr;const tname=isH?home:away;
+    const isH=ab===hAbbr;
     const s={};
     (t.statistics||[]).forEach(st=>{
       const v=st.displayValue;
@@ -828,8 +833,8 @@ function parseESPN(sum,home,away,evt){
       if(st.name==='foulsCommitted'||st.name==='fouls')s.fouls=parseInt(v)||0;
       if(st.name==='cornerKicks'||st.name==='corners')s.corners=parseInt(v)||0;
     });
-    if(s.totalShots&&s.onTarget)s.offTarget=Math.max(0,s.totalShots-s.onTarget);
-    statistics.push({team:{name:tname},statistics:s});
+    if(s.totalShots&&s.onTarget!=null)s.offTarget=Math.max(0,(s.totalShots||0)-(s.onTarget||0));
+    statistics.push({team:{name:isH?home:away},statistics:s});
   });
   return{goals,bookings:[],statistics,_src:'espn'};
 }
@@ -847,11 +852,11 @@ async function getMatchStats(home,away,dispDate,ld){
       parsed._dbg={
         evtId:evt.id,
         evtName:evt.name,
-        scoringPlaysCount:(s.scoringPlays||[]).length,
-        scoringPlaysSample:s.scoringPlays?JSON.stringify(s.scoringPlays[0]||{}).slice(0,200):'none',
-        boxScoreTeams:(s.boxScore?.teams||[]).length,
-        topKeys:Object.keys(s).join(','),
-        eventsOnDate:evts.length
+        keyEventsTotal:(s.keyEvents||[]).length,
+        keyEventsScoringPlays:(s.keyEvents||[]).filter(e=>e.scoringPlay).length,
+        keyEventSample:s.keyEvents?(JSON.stringify((s.keyEvents||[]).find(e=>e.scoringPlay)||{}).slice(0,250)):'none',
+        boxscoreTeams:(s.boxscore?.teams||s.boxScore?.teams||[]).length,
+        topKeys:Object.keys(s).join(',')
       };
       return parsed;
     }else{
